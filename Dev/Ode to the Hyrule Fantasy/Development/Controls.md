@@ -5,7 +5,7 @@ In LoZ, the player can:
 4. Open Inventory 
 5. Pause
 
-![[Pasted image 20260223191819.png]]
+![[NES Controller.png]]
 
 In AoL:
 1. Move
@@ -30,7 +30,7 @@ In Ode:
 
 What about trigger buttons?
 
-![[Pasted image 20260223191739.png]]
+![[Switch Controllers.png]]
 
 OoT:
 1. Move (Control Stick)

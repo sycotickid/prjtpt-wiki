@@ -1,0 +1,234 @@
+{
+  "main": {
+    "id": "4e30eba6a8c4e2d9",
+    "type": "split",
+    "children": [
+      {
+        "id": "bf8874b28ec11f91",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5ca2d6993cb21d12",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "_General/Dream Journal/Subterranean Humans.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Subterranean Humans"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e2d1fdf7919206a0",
+    "type": "split",
+    "children": [
+      {
+        "id": "6cbfe6262833b333",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "239c225f97953fb0",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c73e3492e6176cb3",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "b39552eeca4ba67f",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e35535c11a3f82e8",
+    "type": "split",
+    "children": [
+      {
+        "id": "db419f8f0fc0e159",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d403c40bf810a7e0",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "c322367ff810174f",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "f11722339e903ec6",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "a4464a0f622316bc",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "89122b8bc7baabb9",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "5ca2d6993cb21d12",
+  "lastOpenFiles": [
+    "_General/Dream Journal/Studio Squire.md",
+    "_General/Dream Journal/Pocket Dimension Portal.md",
+    "_General/Dream Journal/Hell - From running to cunning.md",
+    "_General/Dream Journal/Dreams.md",
+    "_General/Dream Journal/Dragon Guild.md",
+    "_General/Dream Journal/Country Bus.md",
+    "_General/Dream Journal/A Link Between Worlds.md",
+    "_General/Dream Journal/A Dream of Chains.md",
+    "_General/Dungeons and Dragons Ideas.md",
+    "_General/Games To Play List.md",
+    "_General/Quotes.md",
+    "_General/Random Story Ideas.md",
+    "_General/Shower Thoughts.md",
+    "_General/Silly Ideas.md",
+    "Dev/GMTK 2025/Untitled.canvas",
+    "Dev/Ideas/ludo-centric/Colony RTS.md",
+    "Dev/Ideas/Game Ideas Board.canvas",
+    "Dev/Ideas/Mechanic Game Ideas - Ludo Centric.md",
+    "Dev/Ideas/Mod Ideas.md",
+    "Dev/Ideas/Narrative Game Ideas - Narrative Centric.md",
+    "Dev/img/idea-images.canvas",
+    "_img/NES Controller.png",
+    "_img/Switch Controllers.png",
+    "_img/Forest of Maze Map.png",
+    "_img/Prjtpt Logo Animation.png",
+    "_img/Demo Area.png",
+    "_General/Workouts.md",
+    "_General/To Read List.md",
+    "_General/Five Year Plan.md",
+    "_General/Examen.md",
+    "Paycom/Tax Central/Tax Central.md",
+    "Dev/img",
+    "Dev/Ideas/narrative-centric",
+    "Dev/Ideas/ludo-centric",
+    "Dev/Ideas",
+    "Dev/GMTK 2025",
+    "Dev/Portfolio Dungeon/Tasks.md",
+    "Dev/Portfolio Dungeon/Overview.md",
+    "Dev/Portfolio Dungeon",
+    "_General/Dream Journal/Subterranean Humans.md",
+    "_General/Dream Journal",
+    "_img/Teddy Bear.png",
+    "_img/Light_in_the_Dark.png",
+    "_img/Jurassic Park Build & Escape.png",
+    "_img/Human Halves.png",
+    "_img",
+    "_General",
+    "Paycom/Tax Central"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+	"nodes":[
+		{"id":"2c9cae33586d978c","x":-400,"y":-480,"width":565,"height":60,"type":"text","text":"**GMTK Game Jam 2025 - Ouroboros Co. Looking Ahead**"},
+		{"id":"f5b4f255f1833946","x":-680,"y":-360,"width":440,"height":379,"color":"4","type":"text","text":"Issues to Fix:\n- ~~Lights in the cafe were too far apart~~\n- ~~Ceiling light collision was in the way~~\n- Control prompts do not stop the player, making it easy for them to linger and become confusing\n- No options menu (SFX volume is inconsistent between player)\n- No music - common feedback\n- "},
+		{"id":"d3dfb073f3f1d1d1","x":-117,"y":-360,"width":440,"height":660,"color":"1","type":"text","text":"Future Plans:\n\n- A story can be developed around this jam concept:\n\t- A man, who works in a dystopian future, falls asleep on the job and is left behind after a state-issued curfew. With his phone dead, he has no way to let his family know he is safe. He needs to get home without getting caught by enforcers or the building's security.\n- This game can become a short but suspenseful metroid-vania about sneaking around and making it home?\n- Add more unlockable abilities\n- Add an external environment and more parts of the building. Maybe we are on the 3rd or 4th floor and need to descend before jumping out of the building into the alleyway"}
+	],
+	"edges":[]
+}

@@ -1,0 +1,8 @@
+I had a dream where I could enter this strange underground dungeon room through portals that I could create in the ground (by making an opening motion like opening a trap door and it creates a small and strange opening in the ground that looks like the floor on the outside (top side), but inside is a reflective dome with glowing markings on the inside, betraying its magical nature).
+
+Once inside, it looked like a large dungeon entrance with two door ways: one entrance, going up towards one side of the room, lead to a large door that appeared to house some sort of monster while the door on the other side of the room lead to some hellscape (but not quite Hell).
+
+#### Around this feature, I did several things:
+With some friends from JPC, we went into a store and punched huge holes into mattresses to start a fire (why on earth?) and then left right before igniting it so that we wouldn't get caught. As soon as we left, I showed one of the girls (don't know who) the portals that I create to escape these kinds of things and she was amazed!
+
+I was in a sports bar in California that reminded me of "Miller's Ale House". The staff I spoke to looked like co-workers from iD-Tech and I spoke to them about my time working at Miller's Ale House. Then after I had apparently told a few people about the portal and underworld room, someone that looked like Henry Winkler accidentally revealed the whole thing to the world (apparently some private investigator was spying on him for the news) when he opened a portal behind the counter by making the same opening motion (?). Behind his portal, there was a magical gauntlet (a la the Infinity Gauntlet I guess) that my team and I (where did this come from) were hiding for the big monster behind the first door.

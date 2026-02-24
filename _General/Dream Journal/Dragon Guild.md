@@ -1,0 +1,3 @@
+I was infiltrating a dragon tamer guild (bad guys, like White Fang). I entered through a small house in the middle of nowhere and found a way underground. I snuck around and found my way to a huge graduation ceremony (I was in the side room sitting on the floor with maybe 50 other people and it looked like there were a lot (thousands of seniors in the main room)
+
+Notes: Probably, based off of new comic I read (Glacius). Dragon tamer can eat rocks the color of their dragon's type , they can then "breath fire kind of" (it looked more like a decorative flare kind of thing. (I ate green gems and breathed a green mist thing) I jumped through it and landed when entering the side room at the end of the dream).

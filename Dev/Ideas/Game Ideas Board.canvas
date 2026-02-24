@@ -1,0 +1,24 @@
+{
+	"nodes":[
+		{"id":"6e10da286ee9d1ba","type":"file","file":"_img/Jurassic Park Build & Escape.png","x":-825,"y":-280,"width":475,"height":781},
+		{"id":"637a95d4a5cea7d4","type":"file","file":"_img/Human Halves.png","x":-320,"y":-280,"width":380,"height":401},
+		{"id":"f404f13c5ca730cc","type":"text","text":"# Narrative Ideas","x":316,"y":-460,"width":618,"height":60},
+		{"id":"1f11e6b9e41eb331","type":"file","file":"Dev/Ideas/Narrative Game Ideas - Narrative Centric.md","x":316,"y":-320,"width":618,"height":680},
+		{"id":"aca1d682d53b4b1b","type":"text","text":"# Game Ideas Mined from the Internet","x":-659,"y":-460,"width":618,"height":60},
+		{"id":"3da0d948c903cf36","type":"text","text":"# Mechanic Ideas","x":1160,"y":-460,"width":618,"height":60},
+		{"id":"7c008cded8e97995","type":"file","file":"_images/Light_in_the_Dark.png","x":1860,"y":-320,"width":267,"height":400},
+		{"id":"cf2e4d806c55fc64","type":"file","file":"Dev/Game Dev/Ideas/Mod Ideas.md","x":-1560,"y":-280,"width":380,"height":440},
+		{"id":"a7dd30762041f2ff","type":"text","text":"# Clone Series","x":316,"y":-1221,"width":618,"height":61},
+		{"id":"029a21c3783634a2","type":"file","file":"_img/Teddy Bear.png","x":20,"y":560,"width":723,"height":578},
+		{"id":"d7324f2110118c74","type":"text","text":"#### Ode to the Hyrule Fantasy:\nA 3rd person recreation of the original Legend of Zelda game\n\nYou are Linus, a boy destined to save this land from <BAD_GUY>!\n\nSome rules to consider:\n- Each “tile” should take the same amount of time to run across as in the original (so the faster you are, the bigger each “tile” needs to be to accommodate that\n- Each dungeon “tile” should be treat as an overworked tile in terms of size (consider the interactions between the dungeon and the overlapping tile above it i.e. a dungeon tile underneath a water tile might have leaks in the ceiling, or roots if it’s under a forest)\n- This is a tribute, but we don’t want C&D from Nintendo, design original spins off of the original content (a slingshot goblin instead of an octorock)\n\nSome other ideas (so far):\n- You start in a forest, consider what kind of forest: what does the floor look like, how tall are the trees, etc\n- Consider what the tiles between “biomes” looks like, what should the coast look like from the forest. (Look up lakes in forests, etc)\n\nStory Ideas:\nCan a story be implemented based on the game manual where villages dot the landscape (perhaps where NPCs are located in the original game) that you can complete quests for and eventually grow to help you combat enemies or assist in other ways?\nFor example:\n- A village with a guard force is being starved out, preventing the guard from effectively protecting the villagers. If you sneak enough food into the village, the guards can regain their strength and fight off the enemies nearby, allowing you passage?\n- A coastal village that is unable to provide you with equipment or supplies until you help to destroy a blockade or something.\n\nMaybe there can be an introduction that leads Link to the first screen (where he can get his sword)? Maybe he is just a normal villager who is sneaking around to survive, but the loss of his family or village spurs him to accept the call to adventure and saving the kindgom!\n\n#### Old Flash Games that I'd like to recreate:\n\n[Bunni: How we first met](https://www.youtube.com/watch?v=9_Ik7lPNKvI) A city-building, quest completing island jumping game?\n\n[Hands of War Trilogy](https://handsofwar.fandom.com/wiki/Hands_of_War_Wiki) This is what Caves and Towns was originally inspired by.","x":1275,"y":-1318,"width":1505,"height":778},
+		{"id":"67ab960e5fa57e0a","type":"file","file":"Dev/Ideas/Mechanic Game Ideas - Ludo Centric.md","x":1160,"y":-320,"width":618,"height":680}
+	],
+	"edges":[
+		{"id":"e827f605a5fda697","fromNode":"aca1d682d53b4b1b","fromSide":"bottom","toNode":"6e10da286ee9d1ba","toSide":"top"},
+		{"id":"875b2170a7fcaa86","fromNode":"aca1d682d53b4b1b","fromSide":"bottom","toNode":"637a95d4a5cea7d4","toSide":"top"},
+		{"id":"a6419b16d55cdfcb","fromNode":"f404f13c5ca730cc","fromSide":"bottom","toNode":"1f11e6b9e41eb331","toSide":"top"},
+		{"id":"9da72cd132aca109","fromNode":"3da0d948c903cf36","fromSide":"bottom","toNode":"67ab960e5fa57e0a","toSide":"top"},
+		{"id":"471a71f2392fe28f","fromNode":"67ab960e5fa57e0a","fromSide":"right","toNode":"7c008cded8e97995","toSide":"left"},
+		{"id":"4c6c85d7b273e161","fromNode":"1f11e6b9e41eb331","fromSide":"bottom","toNode":"029a21c3783634a2","toSide":"top"}
+	]
+}

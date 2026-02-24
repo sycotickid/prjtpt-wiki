@@ -1,1 +1,1 @@
-![[Pasted image 20260223171214.png]]
+![[Prjtpt Logo Animation.png]]

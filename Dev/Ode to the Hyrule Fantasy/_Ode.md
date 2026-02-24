@@ -142,7 +142,7 @@ After demo (polish & art)
 
 For level / world design, look into real life reference for cliffs (Ireland & Oregon)
 
-![[Pasted image 20260223191623.png]]
+![[Forest of Maze Map.png]]
 
 Misc ideas:
 
