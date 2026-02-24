@@ -1,0 +1,1 @@
+[[Eagle Rock]] & [[Serpent’s Isle]] both take place on islands on the central Lake. We should take queues from submerged caves as inspiration for room ideas. For example, since you need the raft to make it to lvl four. There should be parts of the dungeon that are submerged, where you can even see the bottom of the room underwater as you ride your raft through it.

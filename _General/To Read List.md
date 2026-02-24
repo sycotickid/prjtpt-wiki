@@ -1,0 +1,21 @@
+- Pentateuch
+- The Wing Feather Saga: On the Edge of the Dark Sea of Darkness
+- The Hobbit
+- The Divine Comedy
+- Searching for and Maintaining Peace
+- The Rule of St. Benedict
+- Confessions
+- The Screwtape Letters
+- Jesus and the Jewish Roots of the Eucharist
+- The Intellectual Life
+- The Three Conversions in the Spiritual Life
+- Introduction to the Devout Life
+- Thoughtful Theism
+- The Lord of the Rings
+- The Witcher: Sword of Destiny
+- The Battle for the American Mind
+- Gaming and the Heroic Life
+- A Landscape with Dragons
+- The Hero with a Thousand Faces
+- The Borrowers
+- Etiquette

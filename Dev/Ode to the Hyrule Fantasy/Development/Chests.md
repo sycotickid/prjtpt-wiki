@@ -1,0 +1,1 @@
+Implement functionality to display a dialogue box and directly add an item to the inventory on interact

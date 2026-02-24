@@ -1,0 +1,2 @@
+- Look into Point Linda formation and caves for beach reference
+- Look into Tahoe Rim Trail for reference
