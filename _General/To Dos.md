@@ -1,0 +1,4 @@
+- [ ] Renew passport online ⏫ 📅 2026-02-25
+- [ ] Look into doing “Class Nights” 
+- [ ] Plan projects around the house
+- [ ] Plan IRA & Gold investment plan

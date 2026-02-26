@@ -1,0 +1,51 @@
+{
+  "collapse-filter": true,
+  "search": "",
+  "showTags": false,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "showOrphans": true,
+  "collapse-color-groups": false,
+  "colorGroups": [
+    {
+      "query": "Path: \"Dev/Ode to the Hyrule Fantasy\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 3692314
+      }
+    },
+    {
+      "query": "Path: _General  ",
+      "color": {
+        "a": 1,
+        "rgb": 17065
+      }
+    },
+    {
+      "query": "Path:Paycom  ",
+      "color": {
+        "a": 1,
+        "rgb": 16116736
+      }
+    },
+    {
+      "query": "Path: \"Dev/Project Teapot\"  ",
+      "color": {
+        "a": 1,
+        "rgb": 11868672
+      }
+    }
+  ],
+  "collapse-display": false,
+  "showArrow": false,
+  "textFadeMultiplier": 0,
+  "nodeSizeMultiplier": 1,
+  "lineSizeMultiplier": 1,
+  "collapse-forces": true,
+  "centerStrength": 0.518713248970312,
+  "repelStrength": 10,
+  "linkStrength": 1,
+  "linkDistance": 250,
+  "scale": 0.5448462789804116,
+  "close": true
+}

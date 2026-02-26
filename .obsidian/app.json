@@ -1,3 +1,5 @@
 {
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "openBehavior": "file:Dashboard",
+  "attachmentFolderPath": "_img"
 }

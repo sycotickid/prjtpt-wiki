@@ -6,7 +6,7 @@ Show ocarina of time
 
 “Seen in a way, long desired.”
 
-Show game map from manual, then transition to same angle of [[_Ode]] map, pan down to Link arriving on the ferry.
+Show game map from manual, then transition to same angle of [[Journal]] map, pan down to Link arriving on the ferry.
 
 …
 
@@ -26,7 +26,7 @@ Show game map from manual, then transition to same angle of [[_Ode]] map, pan do
 - Entering, stark lighting
 - Campsite 
 - Link resting, maybe at the base of the waterfall of the title screen?
-- Overlay: An [[_Ode]] to the Hyrule Fantasy
+- Overlay: An [[Journal]] to the Hyrule Fantasy
 - Pan up to the waterfall for the action shot 
 - Overlay: Ode to the Hyrule Fantasy Sycotic Games, wishlist, follow, etc
 

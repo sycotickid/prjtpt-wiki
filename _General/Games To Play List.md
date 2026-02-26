@@ -1,5 +1,0 @@
-- [ ] Ocarina of Time
-- [ ] Hollow Knight
-- [ ] Skyrim
-- [ ] TUNIC
-- [ ] The Witcher I Remake

@@ -1,6 +1,6 @@
 Working Title:
 
-[[_Ode]] to the Hyrule Fantasy
+[[Journal]] to the Hyrule Fantasy
 
 - Hyrule
 - Hieroule 

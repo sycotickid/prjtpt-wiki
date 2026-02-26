@@ -6,4 +6,4 @@ Points on the Bézier curve can denote where the center of the river is with a r
 
 Whether or not 2D shapes as bodies of water can connect to the bezier rivers, a shader should be built to seamlessly display stylized water across rivers and lakes (and show ripples when the water mesh intersects with land)
 
-Can be used to create various rivers and lakes in [[_Ode]]
+Can be used to create various rivers and lakes in [[Journal]]

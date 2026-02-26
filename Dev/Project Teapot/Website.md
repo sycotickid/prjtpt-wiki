@@ -14,7 +14,7 @@ Project Teapot (prjtpt) is a website that hosts multiplayer browser games.
 
 We build the front-end as a SSR hypermedia application that uses three.js and various other frameworks to host clients of browser based games. It will use WebTransport API to connect to a game server built in Go. The website can also allow for profiles that could store player avatar information!
 
-### Components:
+### Components
 Web application(vanilla) that includes a front page, authentication (log-in) / account creation (friends list - how do we display currently online friends - rcc?), and games page that opens up a stand alone game page using three js (pause menu allows player to go back to the games page.
 
 Game server (golang) that allows players to open and connect to a lobby and start games with other players.

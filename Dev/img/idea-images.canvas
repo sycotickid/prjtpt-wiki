@@ -1,9 +1,0 @@
-{
-	"nodes":[
-		{"id":"657810911a61f774","type":"file","file":"_img/Human Halves.png","x":-806,"y":-340,"width":379,"height":400},
-		{"id":"00c0549227a55d56","type":"file","file":"_img/Jurassic Park Build & Escape.png","x":-280,"y":-340,"width":243,"height":400},
-		{"id":"6b6a541bc801bb68","type":"file","file":"_img/Light_in_the_Dark.png","x":100,"y":-340,"width":267,"height":400},
-		{"id":"f0e03b7b1cb502b3","type":"file","file":"_img/Teddy Bear.png","x":-806,"y":180,"width":400,"height":320}
-	],
-	"edges":[]
-}

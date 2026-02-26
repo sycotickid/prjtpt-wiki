@@ -1,21 +1,25 @@
-- Pentateuch
-- The Wing Feather Saga: On the Edge of the Dark Sea of Darkness
-- The Hobbit
-- The Divine Comedy
-- Searching for and Maintaining Peace
-- The Rule of St. Benedict
-- Confessions
-- The Screwtape Letters
-- Jesus and the Jewish Roots of the Eucharist
-- The Intellectual Life
-- The Three Conversions in the Spiritual Life
-- Introduction to the Devout Life
-- Thoughtful Theism
-- The Lord of the Rings
-- The Witcher: Sword of Destiny
-- The Battle for the American Mind
-- Gaming and the Heroic Life
-- A Landscape with Dragons
-- The Hero with a Thousand Faces
-- The Borrowers
-- Etiquette
+- [ ] Pentateuch
+- [ ] The Wing Feather Saga: On the Edge of the Dark Sea of Darkness
+- [ ] The Hobbit
+- [ ] The Divine Comedy
+- [ ] Searching for and Maintaining Peace
+- [ ] The Rule of St. Benedict
+- [ ] Confessions
+ - [ ] The Screwtape Letters
+- [ ] Jesus and the Jewish Roots of the Eucharist
+- [ ] The Intellectual Life
+- [ ] The Three Conversions in the Spiritual Life
+- [ ] Introduction to the Devout Life
+- [ ] Thoughtful Theism
+- [ ] The Lord of the Rings
+- [ ] The Witcher: Sword of Destiny
+- [ ] The Battle for the American Mind
+- [ ] Gaming and the Heroic Life
+- [ ] A Landscape with Dragons
+- [ ] The Hero with a Thousand Faces
+- [ ] The Borrowers
+- [ ] Etiquette
+- [ ] [The Power of Moments](https://heathbrothers.com/books/the-power-of-moments/)
+- [ ] [From Christendom to Apostolic Mission](https://bookstore.umary.edu/MerchDetail?MerchID=1638495&num=0&start=9&end=12&type=1&CategoryName=Books&CatID=29630&Name=Books)
+- [ ] [A Canticle for Leibowitz](https://www.eastonpress.com/all-categories/sci-fi-and-fantasy/a-canticle-for-leibowitz-3815020.html)
+- [ ] [The Storm before the Storm](https://www.barnesandnoble.com/w/the-storm-before-the-storm-mike-duncan/1125684200)

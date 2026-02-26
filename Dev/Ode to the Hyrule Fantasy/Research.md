@@ -1,4 +1,4 @@
-[[_Ode]]
+[[Journal]]
 
 Notes from BotW:
 

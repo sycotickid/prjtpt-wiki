@@ -2,7 +2,7 @@
 
 Dev Logs
 
-- [[_Ode]] Dev Vlogs to be released on YouTube under the Sycotic Games channel
+- [[Journal]] Dev Vlogs to be released on YouTube under the Sycotic Games channel
 
 How often should dev logs be released? As often as I have something to show? Hi-weekly like a sprint? Todo: See how often people release updates
 - A corresponding dev blog post will be written on itch.io (or some other website?) to go into more details regarding progress and technical developments
