@@ -1,11 +1,8 @@
-
-![Attachment.png](blob:capacitor://localhost/e01261cc-e9a7-4299-b444-e7648365a627)
-
 Project Teapot (prjtpt) is a website that hosts multiplayer browser games.
 
 
 ### What’s the tech stack?
-- Front-end: Vanilla
+- Front-end: Vanilla w/ Datastar
 - Games: Three.js & Rapier Howler.js, etc)
 - Transfer Protocol: WebTransport API
 - Back-end: Golang (with quic-go & webtransport-go)
@@ -28,12 +25,13 @@ Games:
 - Teapotolis (RTS)
 - Pirates (pirates of the Spanish Maine)
 - Dungeon Delvers (Dark Souls + Betrayal)
+- Fire Pot (Fire Emblem)
 
 Steps:
-- [ ] Create public GitHub repo: prjtpt using go-svelte template
+- [x] Create public GitHub repo: prjtpt ✅ 2026-03-09
 - [ ] Configure GitHub actions for stg & prod environments
 - [ ] Create a golang application that will eventually be our server
-- [ ] See if we can bundle our svelte front-end in the same repo and how that work
+- [ ] Implement datastar templating in the same repo and how that work
 - [ ] Build out Postgres db and create test endpoint to get the contents of a test table
 - [ ] See if we can use GitHub pages as a testing environment and then leave hostinger as the prod environment
 - [ ] Design prjtpt front page and website style (3D, glassmorphism, etc?)

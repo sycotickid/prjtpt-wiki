@@ -13,15 +13,44 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Dev/Ode to the Hyrule Fantasy/Journal.md",
+                "file": "_General/Workouts.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Journal"
+              "title": "Workouts"
+            }
+          },
+          {
+            "id": "97f971000171c0ee",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Dashboard.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Dashboard"
+            }
+          },
+          {
+            "id": "5cd195ae2b759de2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "_General/To Dos.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "To Dos"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -112,7 +141,7 @@
         "state": {
           "type": "backlink",
           "state": {
-            "file": "Dev/Ode to the Hyrule Fantasy/Design/Overworld/References.md",
+            "file": "_General/To Watch List.md",
             "collapseAll": false,
             "extraContext": false,
             "sortOrder": "alphabetical",
@@ -157,6 +186,7 @@
   },
   "left-ribbon": {
     "hiddenItems": {
+      "obsidian-excalidraw-plugin:New drawing": false,
       "switcher:Open quick switcher": false,
       "graph:Open graph view": false,
       "canvas:Create new canvas": false,
@@ -169,27 +199,37 @@
       "table-editor-obsidian:Advanced Tables Toolbar": false
     }
   },
-  "active": "6f4f784ac485e192",
+  "active": "5cd195ae2b759de2",
   "lastOpenFiles": [
+    "Dev/Ode to the Hyrule Fantasy/Design/Dungeons/Eagle Rock.md",
     "Dashboard.md",
+    "Dev/Project Teapot/To Dos.md",
+    "_General/To Watch List.md",
     "_General/To Dos.md",
+    "_General/Five Year Plan.md",
+    "_General/Links for Later.md",
+    "Untitled.md",
+    "_General/Workouts.md",
+    "Dev/Portfolio Dungeon/Temp portfolio.md",
+    "Dev/Portfolio Dungeon/Overview.md",
+    "Dev/Project Teapot/Website.md",
+    "Dev/Project Teapot/Civilitea.md",
+    "_General/Examen.md",
+    "Dev/Ode to the Hyrule Fantasy/Journal.md",
+    "_General/Board Games.md",
+    "_General/To Read List.md",
+    "_General/To Play List.md",
     "Dev/Ideas/Mechanic Game Ideas - Ludo Centric.md",
     "_General/Silly Ideas.md",
     "Dev/Ideas/Game Ideas Board.canvas",
     "Dev/img/idea-images.canvas",
     "Dev/GMTK 2025/Future Plans.canvas",
-    "Dev/Ode to the Hyrule Fantasy/Journal.md",
     "Dev/Ode to the Hyrule Fantasy/_To Do.md",
-    "Dev/Project Teapot/Website.md",
     "Dev/Armored Assault/To Do.md",
     "Dev/Ode to the Hyrule Fantasy/Marketing/Streaming & Devlogs.md",
     "Dev/Ode to the Hyrule Fantasy/Marketing/Marketing.md",
-    "_General/To Watch List.md",
-    "_General/To Play List.md",
-    "_General/To Read List.md",
     "Dev/Armored Assault/Rulebook.md",
     "_General/Coquito Changes.md",
-    "Dev/Ode to the Hyrule Fantasy/Design/Overworld/References.md",
     "_img/CA_lake_tahoe.png",
     "_img/CA_emerald_bay.png",
     "_img/OR_multnomah_falls.png",
@@ -197,20 +237,11 @@
     "_img/OR_boiler_bay.png",
     "_img/la_jolla_cove.jpeg",
     "_img/eagle_lake.jpg",
-    "_General/Mass Resources.md",
-    "Dev/Ode to the Hyrule Fantasy/Design/Overworld/Demo Area.md",
-    "Dev/Game Ideas.md",
     "Dev/GMTK 2025",
-    "Dev/Ideas/ludo-centric/Colony RTS.md",
-    "Dev/Ideas/Mod Ideas.md",
-    "Dev/Ideas/Narrative Game Ideas - Narrative Centric.md",
     "Dev/Ideas/ludo-centric",
     "Dev/Ideas",
     "Dev/img",
-    "Dev/Portfolio Dungeon/Overview.md",
-    "Dev/Portfolio Dungeon/Tasks.md",
     "Dev/Portfolio Dungeon",
-    "_General/Random Story Ideas.md",
     "_General/Dream Journal",
     "_img/Teddy Bear.png",
     "_img/Demo Area.png",

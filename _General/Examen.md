@@ -1,8 +1,10 @@
 #### Last confession:
-2/12/2026
+3/5/2026
 
 #### Examination of Conscious:
 - 
 
 #### Penance: 
-- One Rosary
+- five decades of the rosary 
+- Commit to a daily plan of life
+- Morning prayer and examine

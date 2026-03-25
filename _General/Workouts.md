@@ -24,7 +24,9 @@ Shoulders
 
 Abs
 - Cable Crunches: 82.5 lbs
-- Leg Raises (curve your back)
+- Hanging Leg Raises
+- Bicycle Crunch
+- Plank
 
 Back
 - Dumbbell Row: 70lbs
@@ -33,8 +35,7 @@ Back
 - Kneeling Cable Rows: 57 lbs
 - Upper lat shrug: 50 lbs
 - 45° cable row (lower lat): 72.5 lbs / 92.5 lbs
-
-Wide cable lat pulldown:
+- Wide cable lat pulldown:
 - Pull-ups: 6reps
 - T-bar Row: 90 lbs / 160 lb
 

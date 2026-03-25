@@ -1,7 +1,10 @@
 Home page
 
-
-
+# Quick Links
+- [[Workouts]]
+- Ode [[Journal]]
+- [[_General/To Dos]]
+- [[Dev/Project Teapot/To Dos|To Dos]]
 
 # Tasks Overview
 
