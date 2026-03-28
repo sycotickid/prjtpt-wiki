@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "_General/To Dos.md",
+                "file": "Dashboard.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "To Dos"
+              "title": "Dashboard"
             }
           }
         ],
@@ -201,8 +201,9 @@
   },
   "active": "5cd195ae2b759de2",
   "lastOpenFiles": [
-    "Dev/Ode to the Hyrule Fantasy/Design/Dungeons/Eagle Rock.md",
     "Dashboard.md",
+    "_General/Big Spends List.md",
+    "Dev/Ode to the Hyrule Fantasy/Design/Dungeons/Eagle Rock.md",
     "Dev/Project Teapot/To Dos.md",
     "_General/To Watch List.md",
     "_General/To Dos.md",
@@ -229,7 +230,6 @@
     "Dev/Ode to the Hyrule Fantasy/Marketing/Streaming & Devlogs.md",
     "Dev/Ode to the Hyrule Fantasy/Marketing/Marketing.md",
     "Dev/Armored Assault/Rulebook.md",
-    "_General/Coquito Changes.md",
     "_img/CA_lake_tahoe.png",
     "_img/CA_emerald_bay.png",
     "_img/OR_multnomah_falls.png",
