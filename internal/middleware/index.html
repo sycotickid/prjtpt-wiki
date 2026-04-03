@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/middleware/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">middleware/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="index.html" class="active">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128101; Package middleware</div>
+      <h1>internal/middleware/</h1>
+      <p>HTTP middleware providing cross-cutting concerns: CORS enforcement, structured request logging, OWASP security headers, JWT authentication, and double-submit CSRF protection.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>cors.go</code></td><td class="desc">Single-origin CORS enforcement — rejects requests from disallowed origins with HTTP 403.</td></tr>
+        <tr><td><code>logger.go</code></td><td class="desc">Structured request/response logging — captures method, path, status, latency, IP, and user-agent.</td></tr>
+        <tr><td><code>security.go</code></td><td class="desc">OWASP security response headers (CSP, HSTS, X-Frame-Options, Permissions-Policy, etc.).</td></tr>
+        <tr><td><code>auth.go</code></td><td class="desc">JWT Bearer token extraction and validation; injects authenticated user ID into request context.</td></tr>
+        <tr><td><code>csrf.go</code></td><td class="desc">Double-submit cookie CSRF protection — generates tokens and validates the <code>X-CSRF-Token</code> header.</td></tr>
+        <tr><td><code>middleware_test.go</code></td><td class="desc">Integration tests for CORS, security headers, logging, and CSRF flows.</td></tr>
+        <tr><td><code>auth_csrf_test.go</code></td><td class="desc">Tests specifically for the auth and CSRF middleware interaction.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>cors.go — CORS Enforcement</h2>
+    <p>Implements single-origin CORS rather than a wildcard allow-list. Only the origin in <code>cfg.CORSOrigin</code> is permitted.</p>
+
+    <h3>Behaviour</h3>
+    <ul style="color:var(--text-muted); margin:10px 0 10px 24px; line-height:2.2;">
+      <li><strong>OPTIONS preflight:</strong> Responds immediately with <code>204 No Content</code> and the appropriate CORS headers, without forwarding to the handler.</li>
+      <li><strong>Allowed origin:</strong> Adds <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code>, and <code>Access-Control-Allow-Credentials: true</code>.</li>
+      <li><strong>Disallowed origin:</strong> Returns <code>403 Forbidden</code> immediately.</li>
+      <li><strong>No Origin header:</strong> Allowed through (server-to-server or same-origin requests).</li>
+    </ul>
+
+    <div class="callout callout-security">
+      <p><strong>Credentials flag:</strong> <code>Access-Control-Allow-Credentials: true</code> is set because the application uses HttpOnly cookies for refresh tokens. This is safe because the origin is restricted to a single known value, not a wildcard.</p>
+    </div>
+
+    <h2>logger.go — Request Logging</h2>
+    <p>Wraps the <code>http.ResponseWriter</code> to intercept the status code and bytes written after the handler completes, then emits a structured log entry.</p>
+
+    <h3>Log Fields Per Request</h3>
+    <table class="schema-table">
+      <thead><tr><th>Field</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">method</td><td class="col-desc">HTTP verb (GET, POST, etc.)</td></tr>
+        <tr><td class="col-name">path</td><td class="col-desc">Request path (no query string)</td></tr>
+        <tr><td class="col-name">status</td><td class="col-desc">Response status code</td></tr>
+        <tr><td class="col-name">latency_ms</td><td class="col-desc">Handler duration in milliseconds</td></tr>
+        <tr><td class="col-name">bytes</td><td class="col-desc">Response body size in bytes</td></tr>
+        <tr><td class="col-name">ip</td><td class="col-desc">Client IP (from X-Real-IP / X-Forwarded-For set by Caddy)</td></tr>
+        <tr><td class="col-name">ua</td><td class="col-desc">User-Agent string (truncated)</td></tr>
+        <tr><td class="col-name">request_id</td><td class="col-desc">Unique ID from chi's RequestID middleware</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Log Levels by Status</h3>
+    <table class="file-table">
+      <thead><tr><th>Status Range</th><th>Log Level</th></tr></thead>
+      <tbody>
+        <tr><td>100–399</td><td><span class="badge badge-green">INFO</span></td></tr>
+        <tr><td>400–499</td><td><span class="badge badge-yellow">WARN</span></td></tr>
+        <tr><td>500+</td><td><span class="badge badge-red">ERROR</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>security.go — OWASP Headers</h2>
+    <p>Sets security-focused response headers on every response. Most headers are static; a few are environment-sensitive.</p>
+
+    <table class="schema-table">
+      <thead><tr><th>Header</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">X-Content-Type-Options</td><td class="col-type">nosniff</td><td class="col-desc">Prevent browsers from MIME-sniffing responses</td></tr>
+        <tr><td class="col-name">X-Frame-Options</td><td class="col-type">DENY</td><td class="col-desc">Block the page from being framed (clickjacking)</td></tr>
+        <tr><td class="col-name">Referrer-Policy</td><td class="col-type">strict-origin-when-cross-origin</td><td class="col-desc">Limit referrer leakage to cross-origin requests</td></tr>
+        <tr><td class="col-name">Permissions-Policy</td><td class="col-type">camera=(), microphone=(), geolocation=(), payment=()</td><td class="col-desc">Disable powerful browser features by default</td></tr>
+        <tr><td class="col-name">Strict-Transport-Security</td><td class="col-type">max-age=31536000; includeSubDomains; preload</td><td class="col-desc"><strong>Production only.</strong> Forces HTTPS for 1 year + preload eligibility</td></tr>
+        <tr><td class="col-name">Content-Security-Policy</td><td class="col-type">strict-src</td><td class="col-desc">Restricts script/style/image sources. Relaxed in dev for Vite hot-reload; strict in prod</td></tr>
+      </tbody>
+    </table>
+
+    <h2>auth.go — JWT Middleware</h2>
+    <p>Extracts a Bearer token from the <code>Authorization</code> header, validates it via <a href="../auth/index.html">JWTService</a>, and stores the authenticated user ID in the request context. Protected routes use <code>RequireAuth</code> as a middleware in their route group.</p>
+
+    <h3>Exported Symbols</h3>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">RequireAuth(jwtSvc *auth.JWTService) func(http.Handler) http.Handler</span>
+        <span class="method-desc">Middleware factory. Returns <code>401 Unauthorized</code> if no token is present or it fails validation. Stores the user UUID in context on success.</span>
+      </li>
+      <li>
+        <span class="method-sig">UserIDFromContext(ctx context.Context) (string, bool)</span>
+        <span class="method-desc">Retrieves the authenticated user ID set by <code>RequireAuth</code>. Handlers call this rather than repeating the context key lookup.</span>
+      </li>
+      <li>
+        <span class="method-sig">WithUserID(ctx context.Context, userID string) context.Context</span>
+        <span class="method-desc">Test helper — injects a user ID into a context so handlers can be tested without a real JWT.</span>
+      </li>
+    </ul>
+
+    <h2>csrf.go — Double-Submit Cookie</h2>
+    <p>Implements the double-submit cookie CSRF mitigation pattern. A random token is set as a readable (non-HttpOnly) cookie. State-mutating requests must include the same token in the <code>X-CSRF-Token</code> header. An attacker cannot read the cookie from a different origin, so they can't replicate the header.</p>
+
+    <h3>Flow</h3>
+    <ol style="color:var(--text-muted); margin:12px 0 12px 24px; line-height:2.2;">
+      <li>On the first request (no cookie present) the middleware generates a 32-byte random token (base64url-encoded), sets it as <code>csrf_token</code> cookie with <code>SameSite=Strict</code>, <code>Secure</code>, but <em>not</em> <code>HttpOnly</code> so JavaScript can read it.</li>
+      <li>The Datastar frontend reads this cookie and includes its value as the <code>X-CSRF-Token</code> request header on every POST/PUT/PATCH/DELETE.</li>
+      <li>The middleware compares cookie value to header value. A mismatch returns <code>403 Forbidden</code>.</li>
+      <li>Safe methods (GET, HEAD, OPTIONS) are not checked.</li>
+    </ol>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

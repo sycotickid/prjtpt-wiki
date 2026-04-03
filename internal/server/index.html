@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/server/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">server/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="index.html" class="active">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128268; Package server</div>
+      <h1>internal/server/</h1>
+      <p>The composition root of the application. <code>server.New()</code> builds the entire dependency graph — database pool, stores, services, handlers — and wires them onto the chi router with the full middleware stack.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>server.go</code></td><td class="desc">Constructs the HTTP server, assembles all dependencies, registers routes and middleware.</td></tr>
+        <tr><td><code>db.go</code></td><td class="desc">Opens and configures the PostgreSQL connection pool with retry logic and tuned pool settings.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>server.go — Composition Root</h2>
+    <h3>New() — Assembly Order</h3>
+    <p><code>server.New(cfg, log)</code> performs dependency injection in this order:</p>
+    <ol style="color:var(--text-muted); margin:12px 0 12px 24px; line-height:2.4;">
+      <li>Open PostgreSQL pool via <code>openDB(cfg)</code></li>
+      <li>Instantiate all store implementations (<code>UserStore</code>, <code>FriendStore</code>, <code>GameStore</code>, <code>LobbyStore</code>, <code>MessageStore</code>, <code>PushSubscriptionStore</code>, <code>RefreshTokenStore</code>)</li>
+      <li>Construct service instances: <code>auth.JWTService</code>, <code>storage.S3Client</code>, <code>email.Mailer</code>, <code>presence.Hub</code></li>
+      <li>Start the presence hub goroutine (<code>hub.Run()</code>)</li>
+      <li>Instantiate all handler structs, injecting their store/service dependencies</li>
+      <li>Build the chi router, attach global middleware, register all route groups</li>
+      <li>Return the configured <code>*http.Server</code></li>
+    </ol>
+
+    <h3>Global Middleware Stack</h3>
+    <p>Applied to every request in this order (outermost → innermost):</p>
+    <table class="file-table">
+      <thead><tr><th>Middleware</th><th>Source</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>RealIP</td><td>chi/middleware</td><td class="desc">Extracts the real client IP from <code>X-Real-IP</code> / <code>X-Forwarded-For</code> set by Caddy</td></tr>
+        <tr><td>RequestID</td><td>chi/middleware</td><td class="desc">Generates a unique ID for each request (used in structured logs)</td></tr>
+        <tr><td>RequestLogger</td><td>internal/middleware</td><td class="desc">Structured request/response logging via zerolog</td></tr>
+        <tr><td>SecurityHeaders</td><td>internal/middleware</td><td class="desc">OWASP headers (CSP, HSTS, X-Frame-Options, etc.)</td></tr>
+        <tr><td>CORS</td><td>internal/middleware</td><td class="desc">Single-origin CORS with preflight handling</td></tr>
+        <tr><td>Recoverer</td><td>chi/middleware</td><td class="desc">Catches panics and returns 500 instead of crashing the process</td></tr>
+        <tr><td>Compress</td><td>chi/middleware</td><td class="desc">gzip/deflate response compression</td></tr>
+        <tr><td>CSRF</td><td>internal/middleware</td><td class="desc">Double-submit cookie CSRF protection on state-mutating methods</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Route Groups</h3>
+    <table class="route-table">
+      <thead><tr><th colspan="3">Pages (HTML)</th></tr></thead>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/</td><td class="route-desc">Landing page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/signin</td><td class="route-desc">Sign-in page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/register</td><td class="route-desc">Registration page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/verify-pending</td><td class="route-desc">Awaiting email verification page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/forgot-password</td><td class="route-desc">Forgot password page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/reset-password</td><td class="route-desc">Reset password page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/contact</td><td class="route-desc">Contact page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/products</td><td class="route-desc">Games catalogue page</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/lobby/{id}</td><td class="route-desc">Lobby room page</td></tr>
+    </table>
+    <table class="route-table" style="margin-top:16px">
+      <thead><tr><th colspan="3">Auth API</th></tr></thead>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/register</td><td class="route-desc">Create account</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/login</td><td class="route-desc">Authenticate → JWT + refresh cookie</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/verify-email</td><td class="route-desc">Verify email address with token</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/resend-verification</td><td class="route-desc">Re-send verification email</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/forgot-password</td><td class="route-desc">Issue password reset token</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/reset-password</td><td class="route-desc">Apply new password with reset token</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/refresh</td><td class="route-desc">Exchange refresh cookie for new access token</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/auth/session</td><td class="route-desc">Logout — revoke refresh token</td></tr>
+    </table>
+    <table class="route-table" style="margin-top:16px">
+      <thead><tr><th colspan="3">Protected API (requires JWT)</th></tr></thead>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/users/me</td><td class="route-desc">Get own profile</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/users/me</td><td class="route-desc">Update profile</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/users/me/avatar</td><td class="route-desc">Upload avatar (S3)</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/users/me/status</td><td class="route-desc">Update status</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/users/search</td><td class="route-desc">Search users by display name</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/friends</td><td class="route-desc">List friends</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/friends/requests</td><td class="route-desc">Incoming friend requests</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/friends/requests</td><td class="route-desc">Send friend request</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/friends/requests/{id}</td><td class="route-desc">Accept or decline request</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/friends/{id}</td><td class="route-desc">Remove friend</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/friends/{id}/block</td><td class="route-desc">Block user</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/games</td><td class="route-desc">List game catalogue</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/games/{slug}</td><td class="route-desc">Get game by slug</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/push/vapid-public-key</td><td class="route-desc">Get VAPID public key for Web Push</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/push/subscribe</td><td class="route-desc">Subscribe to push notifications</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/push/subscribe</td><td class="route-desc">Unsubscribe from push notifications</td></tr>
+      <tr><td><span class="method WS">WS</span></td><td class="route-path">/ws/presence</td><td class="route-desc">WebSocket presence stream</td></tr>
+    </table>
+
+    <h2>db.go — Database Pool</h2>
+    <h3>openDB()</h3>
+    <p>Creates a <code>pgxpool.Pool</code> using the <code>DATABASE_URL</code> from config. The pool is configured with:</p>
+    <table class="schema-table">
+      <thead><tr><th>Setting</th><th>Value</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">MinConns</td><td class="col-type">5</td><td class="col-desc">Keep warm connections ready</td></tr>
+        <tr><td class="col-name">MaxConns</td><td class="col-type">25</td><td class="col-desc">Match PostgreSQL's default max_connections allocation</td></tr>
+        <tr><td class="col-name">MaxConnLifetime</td><td class="col-type">1 hour</td><td class="col-desc">Prevent stale connections from accumulating</td></tr>
+        <tr><td class="col-name">MaxConnIdleTime</td><td class="col-type">30 min</td><td class="col-desc">Release unused connections to PostgreSQL</td></tr>
+        <tr><td class="col-name">HealthCheckPeriod</td><td class="col-type">1 min</td><td class="col-desc">Detect dead connections before they're used</td></tr>
+      </tbody>
+    </table>
+    <p>The function retries the connection up to 5 times with exponential backoff, accommodating Docker Compose startup ordering where the API container may start before PostgreSQL is fully ready.</p>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

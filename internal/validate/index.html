@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/validate/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">validate/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="index.html" class="active">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#10003; Package validate</div>
+      <h1>internal/validate/</h1>
+      <p>Lightweight field-level input validation. Each function validates a single field and returns either an empty string (valid) or a human-readable error message. An <code>Errors</code> map type collects multiple field errors for API responses.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>validate.go</code></td><td class="desc">Field validator functions and the <code>Errors</code> type for collecting per-field validation messages.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Validators</h2>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">Email(v string) string</span>
+        <span class="method-desc">Required. Maximum 256 characters. Must match <code>something@something.something</code> pattern. Returns error message or empty string.</span>
+      </li>
+      <li>
+        <span class="method-sig">Password(v string) string</span>
+        <span class="method-desc">Required. 8–72 characters (bcrypt silently truncates above 72). Must contain at least one letter and at least one digit.</span>
+      </li>
+      <li>
+        <span class="method-sig">DisplayName(v string) string</span>
+        <span class="method-desc">Required. 3–32 characters. Only alphanumeric characters, underscores, and hyphens allowed. No spaces.</span>
+      </li>
+    </ul>
+
+    <h2>Errors Type</h2>
+    <pre><span class="kw">type</span> <span class="ty">Errors</span> <span class="kw">map</span>[<span class="ty">string</span>]<span class="ty">string</span>
+
+<span class="cm">// Usage in a handler:</span>
+errs := validate.<span class="ty">Errors</span>{}
+
+<span class="kw">if</span> msg := validate.<span class="fn">Email</span>(req.Email); msg != <span class="st">""</span> {
+    errs[<span class="st">"email"</span>] = msg
+}
+<span class="kw">if</span> msg := validate.<span class="fn">Password</span>(req.Password); msg != <span class="st">""</span> {
+    errs[<span class="st">"password"</span>] = msg
+}
+<span class="kw">if</span> <span class="fn">len</span>(errs) > <span class="nu">0</span> {
+    respond.<span class="fn">jsonValidationError</span>(w, errs) <span class="cm">// 422 Unprocessable Entity</span>
+    <span class="kw">return</span>
+}</pre>
+
+    <h3>API Response for Validation Failure</h3>
+    <pre>{
+  <span class="st">"error"</span>: <span class="st">"validation failed"</span>,
+  <span class="st">"fields"</span>: {
+    <span class="st">"email"</span>: <span class="st">"must be a valid email address"</span>,
+    <span class="st">"password"</span>: <span class="st">"must be at least 8 characters"</span>
+  }
+}</pre>
+
+    <h2>Design Philosophy</h2>
+    <p>The validate package is intentionally minimal — no reflection, no struct tags, no external dependencies. Validators are pure functions: given a string, return an error string or nothing. This makes them trivial to test, compose, and extend.</p>
+
+    <div class="callout callout-tip">
+      <p><strong>Validation boundaries:</strong> Validation is applied at the HTTP handler boundary only (on user input). Internal function calls between packages do not re-validate — trust is established at the edge. This avoids redundant error handling deep in the call stack.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

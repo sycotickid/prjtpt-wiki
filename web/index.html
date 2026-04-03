@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>web/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../index.html">Overview</a>
+    <span class="sep">/</span>
+    <span class="current">web/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Directories</div>
+      <a href="../cmd/index.html">&#128196; cmd/</a>
+      <a href="../internal/index.html">&#128230; internal/</a>
+      <div class="sidebar-sub">
+        <a href="../internal/auth/index.html">auth/</a>
+        <a href="../internal/config/index.html">config/</a>
+        <a href="../internal/email/index.html">email/</a>
+        <a href="../internal/handler/index.html">handler/</a>
+        <a href="../internal/health/index.html">health/</a>
+        <a href="../internal/logger/index.html">logger/</a>
+        <a href="../internal/middleware/index.html">middleware/</a>
+        <a href="../internal/presence/index.html">presence/</a>
+        <a href="../internal/server/index.html">server/</a>
+        <a href="../internal/storage/index.html">storage/</a>
+        <a href="../internal/store/index.html">store/</a>
+        <a href="../internal/validate/index.html">validate/</a>
+      </div>
+      <a href="../migrations/index.html">&#128200; migrations/</a>
+      <a href="index.html" class="active">&#127760; web/</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">On This Page</div>
+      <a href="#templates">templates/</a>
+      <a href="#css">static/css/</a>
+      <a href="#js">static/js/</a>
+      <a href="#fonts">static/fonts/</a>
+      <a href="#datastar">Datastar</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#127760; Frontend Assets</div>
+      <h1>web/</h1>
+      <p>Server-rendered HTML templates and static assets. The frontend uses the <strong>Datastar</strong> hypermedia framework — pages are rendered by the Go server and made reactive through Datastar's SSE-driven signals and fragments rather than a heavyweight client-side SPA framework.</p>
+    </div>
+
+    <h2>Directory Structure</h2>
+    <table class="file-table">
+      <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>web/templates/</code></td><td class="desc">Go HTML templates (base layout + page-specific templates)</td></tr>
+        <tr><td><code>web/static/css/</code></td><td class="desc">Application stylesheet</td></tr>
+        <tr><td><code>web/static/js/</code></td><td class="desc">Datastar framework, app logic, and service worker</td></tr>
+        <tr><td><code>web/static/fonts/</code></td><td class="desc">Self-hosted Material Icons font (offline / firewall-safe)</td></tr>
+        <tr><td><code>web/static/images/</code></td><td class="desc">Logos, favicons, OG images</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="templates">web/templates/</h2>
+    <p>Go's <code>html/template</code> package is used for all server-rendered pages. Templates are parsed once at server startup by <a href="../internal/handler/index.html">handler/renderer.go</a> and cloned per request.</p>
+
+    <h3>index.html — Base Layout</h3>
+    <p>The root layout shell that every page is composed into. Contains:</p>
+    <ul style="color:var(--text-muted); margin:10px 0 10px 24px; line-height:2.2;">
+      <li><strong>Theme detection script:</strong> Reads <code>prefers-color-scheme</code> and sets a <code>data-theme</code> attribute before first paint to prevent flash of wrong theme.</li>
+      <li><strong>CSS link:</strong> <code>/static/css/app.css</code></li>
+      <li><strong>Material Icons:</strong> Self-hosted via <code>/static/fonts/material-icons.css</code></li>
+      <li><strong>Datastar script:</strong> <code>/static/js/datastar.js</code> — the reactive hypermedia engine</li>
+      <li><strong>Service Worker registration:</strong> Registers <code>/static/js/sw.js</code> for push notification support (Phase 2)</li>
+      <li><strong>Navigation bar:</strong> Logo + links (Home, Solutions, Contact). The nav is part of the base layout so it appears on every page.</li>
+      <li><strong>Template slot:</strong> <code>{{block "content" .}}</code> where page-specific content is injected</li>
+    </ul>
+
+    <h3>Page Templates</h3>
+    <table class="file-table">
+      <thead><tr><th>Template</th><th>Route</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>landing.html</code></td><td><code>/</code></td><td class="desc">Homepage — hero section, feature highlights, GitHub commit activity feed</td></tr>
+        <tr><td><code>auth/signin.html</code></td><td><code>/auth/signin</code></td><td class="desc">Login form (email + password). Datastar signals handle form state and submission.</td></tr>
+        <tr><td><code>auth/register.html</code></td><td><code>/auth/register</code></td><td class="desc">Registration form (email + display name + password + confirm). Real-time field validation via Datastar.</td></tr>
+        <tr><td><code>auth/verify-pending.html</code></td><td><code>/auth/verify-pending</code></td><td class="desc">Tells the user to check their inbox. Includes resend button.</td></tr>
+        <tr><td><code>auth/forgot-password.html</code></td><td><code>/auth/forgot-password</code></td><td class="desc">Email input for password reset flow.</td></tr>
+        <tr><td><code>auth/reset-password.html</code></td><td><code>/auth/reset-password</code></td><td class="desc">New password + confirm fields. Token is passed via query string and forwarded to the API.</td></tr>
+        <tr><td><code>contact.html</code></td><td><code>/contact</code></td><td class="desc">Contact form with Datastar SSE response (no full-page reload on submit).</td></tr>
+        <tr><td><code>products.html</code></td><td><code>/products</code></td><td class="desc">Game catalogue — renders the list of active games from the database.</td></tr>
+        <tr><td><code>lobby.html</code></td><td><code>/lobby/{id}</code></td><td class="desc">Pre-game lobby room — member list, ready states, chat, invite button. Live updates via WebSocket presence hub.</td></tr>
+        <tr><td><code>app.html</code></td><td><code>*</code></td><td class="desc">Catch-all SPA shell — served for any unmatched route. Datastar handles client-side navigation within this shell.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="css">web/static/css/app.css</h2>
+    <p>Single application stylesheet with no build step required. Uses CSS custom properties (design tokens) for theming.</p>
+    <ul style="color:var(--text-muted); margin:10px 0 10px 24px; line-height:2.2;">
+      <li><strong>Design tokens:</strong> Colour palette, spacing scale, typography sizes — defined as CSS variables on <code>:root</code> and overridden in <code>[data-theme="dark"]</code>.</li>
+      <li><strong>Automatic dark mode:</strong> Base tokens are dark-mode values. Light mode tokens are applied when <code>data-theme="light"</code> is set (via the theme detection script in the layout).</li>
+      <li><strong>Component styles:</strong> Buttons, inputs, cards, navigation, modals, toasts — all themed via the token system.</li>
+      <li><strong>Utility classes:</strong> Minimal set of flexbox/grid utilities. No Tailwind dependency.</li>
+    </ul>
+
+    <h2 id="js">web/static/js/</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>datastar.js</code></td><td class="desc">Self-hosted Datastar framework (bundled, no CDN dependency). Provides reactive signals, SSE fragment merging, and data-star-* attribute directives.</td></tr>
+        <tr><td><code>app.js</code></td><td class="desc">Application-level JavaScript: WebSocket presence client, JWT token management (stores access token in memory, refreshes automatically), CSRF token header injection, push notification subscription, client-side utilities.</td></tr>
+        <tr><td><code>sw.js</code></td><td class="desc">Service Worker: handles push notification events (<code>push</code> listener), shows browser notifications, and manages notification click actions (navigate to lobby/friend request).</td></tr>
+      </tbody>
+    </table>
+
+    <h3>app.js — Key Responsibilities</h3>
+    <ul style="color:var(--text-muted); margin:10px 0 10px 24px; line-height:2.4;">
+      <li><strong>Token management:</strong> Access tokens are stored in memory (not localStorage) to prevent XSS theft. A refresh timer automatically hits <code>POST /auth/refresh</code> 30 seconds before expiry.</li>
+      <li><strong>CSRF header injection:</strong> Intercepts all fetch calls via a global wrapper, reads the <code>csrf_token</code> cookie, and attaches it as <code>X-CSRF-Token</code>.</li>
+      <li><strong>Presence WebSocket:</strong> Connects to <code>/ws/presence?token=&lt;JWT&gt;</code>, dispatches incoming events to Datastar signals, and handles reconnection with exponential backoff.</li>
+      <li><strong>Push subscription:</strong> Requests notification permission, calls the VAPID public key endpoint, creates a <code>PushSubscription</code>, and POSTs it to <code>/api/v1/push/subscribe</code>.</li>
+    </ul>
+
+    <h3>sw.js — Service Worker</h3>
+    <p>Registered on page load. Handles the browser's <code>push</code> event by parsing the payload and calling <code>showNotification()</code>. Handles <code>notificationclick</code> to navigate the user to the relevant page (e.g. <code>/lobby/{id}</code> for a lobby invite).</p>
+
+    <h2 id="fonts">web/static/fonts/</h2>
+    <p>Contains a self-hosted copy of the Material Symbols / Material Icons font files and their CSS declaration (<code>material-icons.css</code>). Self-hosting avoids external network requests, which is essential for the corporate-firewall use case where Google Fonts may be blocked.</p>
+
+    <h2 id="datastar">Datastar Framework</h2>
+    <p>Datastar is a hypermedia-first reactive framework that extends HTML with <code>data-star-*</code> attributes. Instead of shipping a large JavaScript bundle and managing client-side state, the server streams HTML fragments and JSON signals over SSE that Datastar merges into the DOM.</p>
+
+    <h3>Key Concepts</h3>
+    <table class="file-table">
+      <thead><tr><th>Concept</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>data-signals</code></td><td class="desc">Declares reactive signal values on a DOM element. Signals are like reactive variables that Datastar tracks.</td></tr>
+        <tr><td><code>data-on-click</code></td><td class="desc">Attaches a click handler that can trigger SSE requests or signal mutations.</td></tr>
+        <tr><td><code>data-text</code></td><td class="desc">Binds an element's text content to a signal value — updates automatically when the signal changes.</td></tr>
+        <tr><td><code>data-show</code></td><td class="desc">Conditionally shows/hides an element based on a signal expression.</td></tr>
+        <tr><td>SSE merge</td><td class="desc">Server sends <code>event: datastar-merge-fragments</code> with HTML — Datastar patches the DOM without a full reload.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-tip">
+      <p><strong>Why Datastar?</strong> It delivers a SPA-like user experience without the build complexity, bundle size, or client-state management overhead of React/Vue. The server stays authoritative — a particularly good fit for a server-authoritative gaming platform.</p>
+    </div>
+
+    <h2>Static File Serving</h2>
+    <p>In development (Docker Compose), Caddy serves <code>/static/*</code> files directly from <code>/srv/static</code> (mounted from <code>web/static/</code>). This means CSS/JS changes are immediately reflected without rebuilding the Go binary. In production, the same setup applies — Caddy serves static files while proxying API requests to Go.</p>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

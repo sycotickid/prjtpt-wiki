@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>migrations/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../index.html">Overview</a>
+    <span class="sep">/</span>
+    <span class="current">migrations/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Directories</div>
+      <a href="../cmd/index.html">&#128196; cmd/</a>
+      <a href="../internal/index.html">&#128230; internal/</a>
+      <div class="sidebar-sub">
+        <a href="../internal/auth/index.html">auth/</a>
+        <a href="../internal/config/index.html">config/</a>
+        <a href="../internal/email/index.html">email/</a>
+        <a href="../internal/handler/index.html">handler/</a>
+        <a href="../internal/health/index.html">health/</a>
+        <a href="../internal/logger/index.html">logger/</a>
+        <a href="../internal/middleware/index.html">middleware/</a>
+        <a href="../internal/presence/index.html">presence/</a>
+        <a href="../internal/server/index.html">server/</a>
+        <a href="../internal/storage/index.html">storage/</a>
+        <a href="../internal/store/index.html">store/</a>
+        <a href="../internal/validate/index.html">validate/</a>
+      </div>
+      <a href="index.html" class="active">&#128200; migrations/</a>
+      <a href="../web/index.html">&#127760; web/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128200; Database Schema</div>
+      <h1>migrations/</h1>
+      <p>PostgreSQL schema migrations managed by <a href="https://github.com/golang-migrate/migrate" style="color:var(--accent)">golang-migrate</a>. Each migration is a numbered pair of <code>.up.sql</code> and <code>.down.sql</code> files. The migrator runs as a one-shot Docker Compose service before the API starts.</p>
+    </div>
+
+    <h2>Migration Files</h2>
+    <table class="file-table">
+      <thead><tr><th>#</th><th>Files</th><th>What It Creates</th></tr></thead>
+      <tbody>
+        <tr><td>001</td><td><code>000001_users.up.sql</code> / <code>.down.sql</code></td><td class="desc">Core <code>users</code> table with email/password auth, verification tokens, password reset, display name, avatar, status fields.</td></tr>
+        <tr><td>002</td><td><code>000002_friends.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>friends</code> table — directed friendship graph with status (pending/accepted/blocked).</td></tr>
+        <tr><td>003</td><td><code>000003_games.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>games</code> table — game catalogue (slug, title, description, player counts, screenshots).</td></tr>
+        <tr><td>004</td><td><code>000004_channel_types.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>channel_types</code> reference table seeded with: lobby, game, team, whisper.</td></tr>
+        <tr><td>005</td><td><code>000005_messages.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>messages</code> table — multi-channel chat (scoped by channel_type_id + channel_id).</td></tr>
+        <tr><td>006</td><td><code>000006_lobbies.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>lobbies</code>, <code>lobby_members</code>, and <code>game_sessions</code> tables.</td></tr>
+        <tr><td>007</td><td><code>000007_push_subscriptions.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>push_subscriptions</code> table — Web Push endpoint + p256dh + auth per user per device.</td></tr>
+        <tr><td>008</td><td><code>000008_refresh_tokens.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>refresh_tokens</code> table — server-side token rotation with family-based revocation.</td></tr>
+        <tr><td>009</td><td><code>000009_teams.up.sql</code> / <code>.down.sql</code></td><td class="desc"><code>teams</code> and <code>team_members</code> tables (Phase 5 — pre-created but not yet used).</td></tr>
+        <tr><td>010</td><td><code>000010_indexes.up.sql</code> / <code>.down.sql</code></td><td class="desc">Performance and search indexes: trigram GIN on display_name, partial indexes on active users, pending friends, waiting lobbies, non-revoked tokens.</td></tr>
+        <tr><td>011</td><td><code>000011_games_seed.up.sql</code> / <code>.down.sql</code></td><td class="desc">Seeds the games catalogue with initial game records (slugs, titles, descriptions, player counts).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Schema Diagram</h2>
+    <pre><span class="cm">users ──────────────────────────────────────────────────────────────────────┐
+  │                                                                          │
+  ├──[friends]─── friends (from_user_id, to_user_id, status)                │
+  │                                                                          │
+  ├──[host_id]──► lobbies ──[game_id]──► games                              │
+  │                   │                                                      │
+  │                   ├──[lobby_id, user_id]──► lobby_members               │
+  │                   │                                                      │
+  │                   └──[game_session_id]──► game_sessions                 │
+  │                                                                          │
+  ├──[sender_id]──► messages ──[channel_type_id]──► channel_types           │
+  │                                                                          │
+  ├──[user_id]──► push_subscriptions                                        │
+  │                                                                          │
+  └──[user_id]──► refresh_tokens ────────────────────────────────────────────┘</span></pre>
+
+    <h2>Table Details</h2>
+
+    <h3>users</h3>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">UUID</td><td class="col-desc">Primary key, <code>gen_random_uuid()</code></td></tr>
+        <tr><td class="col-name">email</td><td class="col-type">TEXT</td><td class="col-desc">Unique (functional index on <code>lower(email)</code>), max 256 chars</td></tr>
+        <tr><td class="col-name">password_hash</td><td class="col-type">TEXT</td><td class="col-desc">bcrypt hash at cost 12</td></tr>
+        <tr><td class="col-name">display_name</td><td class="col-type">TEXT</td><td class="col-desc">Unique, 3–32 chars, alphanumeric + <code>_-</code>. GIN trigram index for search.</td></tr>
+        <tr><td class="col-name">avatar_url</td><td class="col-type">TEXT</td><td class="col-desc">S3 public URL, nullable</td></tr>
+        <tr><td class="col-name">email_verified</td><td class="col-type">BOOLEAN</td><td class="col-desc">Default false. Login blocked until true.</td></tr>
+        <tr><td class="col-name">verification_token</td><td class="col-type">TEXT</td><td class="col-desc">SHA-256 hash of the raw token sent by email. Cleared after use.</td></tr>
+        <tr><td class="col-name">verification_token_expires_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">24-hour window</td></tr>
+        <tr><td class="col-name">password_reset_token</td><td class="col-type">TEXT</td><td class="col-desc">SHA-256 hash. Cleared after use.</td></tr>
+        <tr><td class="col-name">password_reset_expires_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">1-hour window</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">Enum: online, offline, away, in_game, in_lobby, custom</td></tr>
+        <tr><td class="col-name">custom_status</td><td class="col-type">TEXT</td><td class="col-desc">Free-text status when status = 'custom'</td></tr>
+        <tr><td class="col-name">notifications_enabled</td><td class="col-type">BOOLEAN</td><td class="col-desc">Default true. Gates Web Push delivery.</td></tr>
+        <tr><td class="col-name">deleted_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">Soft delete. Partial index on active users excludes deleted rows.</td></tr>
+        <tr><td class="col-name">created_at / updated_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">Auto-managed</td></tr>
+      </tbody>
+    </table>
+
+    <h3>friends</h3>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">UUID</td><td class="col-desc">Primary key</td></tr>
+        <tr><td class="col-name">from_user_id</td><td class="col-type">UUID</td><td class="col-desc">FK → users(id)</td></tr>
+        <tr><td class="col-name">to_user_id</td><td class="col-type">UUID</td><td class="col-desc">FK → users(id)</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">pending / accepted / blocked</td></tr>
+        <tr><td class="col-name">created_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc"></td></tr>
+      </tbody>
+    </table>
+    <p>Constraints: no self-friendship (<code>from_user_id != to_user_id</code>), unique pair (<code>UNIQUE (from_user_id, to_user_id)</code> with a partial index excluding blocked).</p>
+
+    <h3>games</h3>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">UUID</td><td class="col-desc">Primary key</td></tr>
+        <tr><td class="col-name">slug</td><td class="col-type">TEXT</td><td class="col-desc">Unique, URL-safe identifier</td></tr>
+        <tr><td class="col-name">title</td><td class="col-type">TEXT</td><td class="col-desc">Display name</td></tr>
+        <tr><td class="col-name">subtitle</td><td class="col-type">TEXT</td><td class="col-desc">One-line tagline</td></tr>
+        <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td class="col-desc">Full description</td></tr>
+        <tr><td class="col-name">category</td><td class="col-type">TEXT</td><td class="col-desc">e.g. "Action", "Puzzle", "Strategy"</td></tr>
+        <tr><td class="col-name">min_players / max_players</td><td class="col-type">INT</td><td class="col-desc">Player count constraints for lobbies</td></tr>
+        <tr><td class="col-name">is_turn_based</td><td class="col-type">BOOLEAN</td><td class="col-desc">Affects game loop implementation</td></tr>
+        <tr><td class="col-name">screenshots</td><td class="col-type">TEXT[]</td><td class="col-desc">Array of image URLs</td></tr>
+        <tr><td class="col-name">is_active</td><td class="col-type">BOOLEAN</td><td class="col-desc">Only active games appear in catalogue</td></tr>
+      </tbody>
+    </table>
+
+    <h3>lobbies</h3>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">UUID</td><td class="col-desc">Primary key</td></tr>
+        <tr><td class="col-name">game_id</td><td class="col-type">UUID</td><td class="col-desc">FK → games(id)</td></tr>
+        <tr><td class="col-name">host_id</td><td class="col-type">UUID</td><td class="col-desc">FK → users(id)</td></tr>
+        <tr><td class="col-name">description</td><td class="col-type">TEXT</td><td class="col-desc">Optional lobby description</td></tr>
+        <tr><td class="col-name">visibility</td><td class="col-type">TEXT</td><td class="col-desc">public / friends_only</td></tr>
+        <tr><td class="col-name">password_hash</td><td class="col-type">TEXT</td><td class="col-desc">Optional bcrypt hash for private lobbies</td></tr>
+        <tr><td class="col-name">max_players</td><td class="col-type">INT</td><td class="col-desc">Defaults to game's max_players</td></tr>
+        <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">waiting / in_game / finished</td></tr>
+        <tr><td class="col-name">game_session_id</td><td class="col-type">UUID</td><td class="col-desc">FK → game_sessions(id), set when game starts</td></tr>
+        <tr><td class="col-name">closed_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">Soft delete timestamp</td></tr>
+      </tbody>
+    </table>
+
+    <h3>refresh_tokens</h3>
+    <table class="schema-table">
+      <thead><tr><th>Column</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">id</td><td class="col-type">UUID</td><td class="col-desc">Primary key</td></tr>
+        <tr><td class="col-name">user_id</td><td class="col-type">UUID</td><td class="col-desc">FK → users(id)</td></tr>
+        <tr><td class="col-name">family_id</td><td class="col-type">UUID</td><td class="col-desc">Groups a chain of rotated tokens together for family revocation</td></tr>
+        <tr><td class="col-name">token_hash</td><td class="col-type">TEXT</td><td class="col-desc">SHA-256 of the raw token sent to the client in the cookie</td></tr>
+        <tr><td class="col-name">expires_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">7 days from issuance</td></tr>
+        <tr><td class="col-name">revoked_at</td><td class="col-type">TIMESTAMPTZ</td><td class="col-desc">Set when rotated or explicitly revoked (logout)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Running Migrations</h2>
+    <pre><span class="cm"># Apply all pending migrations</span>
+make migrate-up
+
+<span class="cm"># Roll back the last migration</span>
+make migrate-down
+
+<span class="cm"># In Docker Compose, the migrator service runs automatically:</span>
+docker compose up</pre>
+
+    <div class="callout callout-info">
+      <p><strong>Tool:</strong> Migrations are run by the <code>golang-migrate/migrate</code> CLI, installed via <code>make tools</code>. The migrator Docker service (<code>Dockerfile.migrator</code>) runs the same CLI inside the container network so it can reach the Postgres service.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

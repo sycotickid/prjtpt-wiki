@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/store/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">store/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="index.html" class="active">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">On This Page</div>
+      <a href="#users">UserStore</a>
+      <a href="#friends">FriendStore</a>
+      <a href="#games">GameStore</a>
+      <a href="#lobbies">LobbyStore</a>
+      <a href="#messages">MessageStore</a>
+      <a href="#push">PushSubscriptionStore</a>
+      <a href="#tokens">RefreshTokenStore</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128202; Package store</div>
+      <h1>internal/store/</h1>
+      <p>The database access layer. Each store struct owns all queries for one domain entity, communicates with PostgreSQL via the <code>pgx/v5</code> driver, and returns typed Go structs. All methods accept <code>context.Context</code> for cancellation and timeout propagation.</p>
+    </div>
+
+    <h2>Design Principles</h2>
+    <ul style="color:var(--text-muted); margin:12px 0 12px 24px; line-height:2.2;">
+      <li>All queries use <strong>parameterized arguments</strong> — no string interpolation in SQL.</li>
+      <li>Store methods return <strong>domain model structs</strong>, not raw database rows.</li>
+      <li>Stores are <strong>injected</strong> into handlers as interfaces, allowing mock-free testing with a real test database.</li>
+      <li>Transactions are used where multiple statements must succeed or fail together (e.g. <code>LobbyStore.Create</code>).</li>
+    </ul>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Store</th><th>Tables</th></tr></thead>
+      <tbody>
+        <tr><td><code>users.go</code></td><td>UserStore</td><td class="desc">users</td></tr>
+        <tr><td><code>friends.go</code></td><td>FriendStore</td><td class="desc">friends</td></tr>
+        <tr><td><code>games.go</code></td><td>GameStore</td><td class="desc">games</td></tr>
+        <tr><td><code>lobbies.go</code></td><td>LobbyStore</td><td class="desc">lobbies, lobby_members, game_sessions</td></tr>
+        <tr><td><code>messages.go</code></td><td>MessageStore</td><td class="desc">messages</td></tr>
+        <tr><td><code>push_subscriptions.go</code></td><td>PushSubscriptionStore</td><td class="desc">push_subscriptions</td></tr>
+        <tr><td><code>refresh_tokens.go</code></td><td>RefreshTokenStore</td><td class="desc">refresh_tokens</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="users">UserStore</h2>
+    <p>Central store for user accounts. Handles the full lifecycle from registration through profile updates.</p>
+
+    <h3>User Model</h3>
+    <pre><span class="kw">type</span> <span class="ty">User</span> <span class="kw">struct</span> {
+    ID                         <span class="ty">string</span>
+    Email                      <span class="ty">string</span>
+    PasswordHash               <span class="ty">string</span>
+    DisplayName                <span class="ty">string</span>
+    AvatarURL                  <span class="ty">string</span>
+    EmailVerified              <span class="ty">bool</span>
+    VerificationToken          *<span class="ty">string</span>    <span class="cm">// SHA-256 hash, not raw token</span>
+    VerificationTokenExpiresAt *<span class="ty">time.Time</span>
+    PasswordResetToken         *<span class="ty">string</span>    <span class="cm">// SHA-256 hash</span>
+    PasswordResetExpiresAt     *<span class="ty">time.Time</span>
+    Status                     <span class="ty">string</span>    <span class="cm">// online|offline|away|in_game|in_lobby|custom</span>
+    CustomStatus               <span class="ty">string</span>
+    NotificationsEnabled       <span class="ty">bool</span>
+    CreatedAt, UpdatedAt       <span class="ty">time.Time</span>
+}</pre>
+
+    <h3>Methods</h3>
+    <ul class="method-list">
+      <li><span class="method-sig">Create(ctx, user)</span><span class="method-desc">Inserts a new user row with a verification token hash.</span></li>
+      <li><span class="method-sig">GetByID(ctx, id)</span><span class="method-desc">Looks up a user by UUID. Returns <code>pgx.ErrNoRows</code> if not found.</span></li>
+      <li><span class="method-sig">GetByEmail(ctx, email)</span><span class="method-desc">Case-insensitive lookup via functional index on <code>lower(email)</code>.</span></li>
+      <li><span class="method-sig">GetByVerificationToken(ctx, hash)</span><span class="method-desc">Looks up an unverified user by their token hash. Used during email verification.</span></li>
+      <li><span class="method-sig">GetByPasswordResetToken(ctx, hash)</span><span class="method-desc">Looks up a user by password-reset token hash. Checks expiry.</span></li>
+      <li><span class="method-sig">VerifyEmail(ctx, userID)</span><span class="method-desc">Sets <code>email_verified = true</code>, clears the verification token fields.</span></li>
+      <li><span class="method-sig">SetPasswordReset(ctx, userID, hash, expiry)</span><span class="method-desc">Stores a new password-reset token hash with a 1-hour expiry.</span></li>
+      <li><span class="method-sig">ResetPassword(ctx, userID, newHash)</span><span class="method-desc">Updates the password hash and clears the reset token fields.</span></li>
+      <li><span class="method-sig">UpdateProfile(ctx, userID, displayName, avatarURL)</span><span class="method-desc">Updates display name and/or avatar URL. Either field can be empty to skip updating it.</span></li>
+      <li><span class="method-sig">UpdateStatus(ctx, userID, status, customStatus)</span><span class="method-desc">Updates the user's presence status.</span></li>
+      <li><span class="method-sig">IsEmailTaken(ctx, email)</span><span class="method-desc">Returns true if a non-deleted user exists with this email.</span></li>
+      <li><span class="method-sig">IsDisplayNameTaken(ctx, name)</span><span class="method-desc">Returns true if a non-deleted user exists with this display name.</span></li>
+      <li><span class="method-sig">SearchByDisplayName(ctx, query, limit)</span><span class="method-desc">Trigram similarity search using the <code>pg_trgm</code> extension's GIN index.</span></li>
+    </ul>
+
+    <h2 id="friends">FriendStore</h2>
+    <p>Manages the directed friendship graph. A friendship record has a direction (from → to) and a status (pending/accepted/blocked). Accepted friendships are symmetric — both users appear in each other's friend lists.</p>
+
+    <h3>Methods</h3>
+    <ul class="method-list">
+      <li><span class="method-sig">ListFriends(ctx, userID)</span><span class="method-desc">Returns all accepted friends with their profile (displayName, avatarURL, status).</span></li>
+      <li><span class="method-sig">ListPendingRequests(ctx, userID)</span><span class="method-desc">Incoming requests where <code>to_user_id = userID</code> and status is pending.</span></li>
+      <li><span class="method-sig">ListSentRequests(ctx, userID)</span><span class="method-desc">Outgoing requests where <code>from_user_id = userID</code> and status is pending.</span></li>
+      <li><span class="method-sig">SendRequest(ctx, fromID, toID)</span><span class="method-desc">Inserts a pending friendship. Errors if blocked or already friends.</span></li>
+      <li><span class="method-sig">RespondToRequest(ctx, friendshipID, userID, accept bool)</span><span class="method-desc">Changes status to accepted or declined. Validates <code>userID</code> is the recipient.</span></li>
+      <li><span class="method-sig">RemoveFriend(ctx, friendshipID, userID)</span><span class="method-desc">Deletes the friendship row. Both users lose each other from their lists.</span></li>
+      <li><span class="method-sig">BlockUser(ctx, fromID, toID)</span><span class="method-desc">Upserts a blocked status. Removes any existing friendship.</span></li>
+      <li><span class="method-sig">GetFriendIDs(ctx, userID)</span><span class="method-desc">Returns a slice of UUIDs of accepted friends. Used by the presence hub to target broadcasts.</span></li>
+      <li><span class="method-sig">IsFriend(ctx, userID, otherID)</span><span class="method-desc">Returns true if an accepted friendship exists between the two users.</span></li>
+      <li><span class="method-sig">IsBlocked(ctx, userID, otherID)</span><span class="method-desc">Returns true if either user has blocked the other.</span></li>
+    </ul>
+
+    <h2 id="games">GameStore</h2>
+    <p>Read-only access to the game catalogue seeded by <a href="../../migrations/index.html">migration 000011</a>.</p>
+    <ul class="method-list">
+      <li><span class="method-sig">ListActive(ctx)</span><span class="method-desc">All games where <code>is_active = true</code>, ordered by title.</span></li>
+      <li><span class="method-sig">GetByID(ctx, id)</span><span class="method-desc">Single game by UUID.</span></li>
+      <li><span class="method-sig">GetBySlug(ctx, slug)</span><span class="method-desc">Single game by URL slug.</span></li>
+    </ul>
+
+    <h2 id="lobbies">LobbyStore</h2>
+    <p>Manages the full lobby lifecycle from creation through game start. Create uses a transaction to insert the lobby and add the host as the first member atomically.</p>
+    <ul class="method-list">
+      <li><span class="method-sig">Create(ctx, lobby, hostID)</span><span class="method-desc">Transaction: inserts lobby + inserts host as member with is_ready=false.</span></li>
+      <li><span class="method-sig">GetByID(ctx, id)</span><span class="method-desc">Single lobby row.</span></li>
+      <li><span class="method-sig">GetWithMembers(ctx, id)</span><span class="method-desc">Lobby row joined with member rows and user profiles.</span></li>
+      <li><span class="method-sig">List(ctx)</span><span class="method-desc">All public lobbies with status "waiting", with game info joined.</span></li>
+      <li><span class="method-sig">Delete(ctx, id, hostID)</span><span class="method-desc">Sets <code>closed_at</code>. Validates caller is host.</span></li>
+      <li><span class="method-sig">Join(ctx, lobbyID, userID)</span><span class="method-desc">Inserts a member row. Fails if lobby is full or not waiting.</span></li>
+      <li><span class="method-sig">Leave(ctx, lobbyID, userID)</span><span class="method-desc">Removes a member row.</span></li>
+      <li><span class="method-sig">UpdateReady(ctx, lobbyID, userID, isReady)</span><span class="method-desc">Sets the member's <code>is_ready</code> flag.</span></li>
+      <li><span class="method-sig">UpdateStatus(ctx, id, status)</span><span class="method-desc">Changes lobby status (waiting → in_game → finished).</span></li>
+      <li><span class="method-sig">AllReady(ctx, id)</span><span class="method-desc">Returns true if all members have <code>is_ready = true</code>.</span></li>
+    </ul>
+
+    <h2 id="messages">MessageStore</h2>
+    <ul class="method-list">
+      <li><span class="method-sig">Create(ctx, msg)</span><span class="method-desc">Inserts a message and immediately joins with the sender's profile (displayName, avatarURL) in one query for efficient return.</span></li>
+      <li><span class="method-sig">ListByChannelID(ctx, channelTypeID, channelID)</span><span class="method-desc">All messages in a channel (e.g. a specific lobby ID), ordered by <code>sent_at ASC</code>.</span></li>
+    </ul>
+
+    <h2 id="push">PushSubscriptionStore</h2>
+    <ul class="method-list">
+      <li><span class="method-sig">Upsert(ctx, sub)</span><span class="method-desc">Insert or update by endpoint. Transfers ownership if the endpoint belonged to another user.</span></li>
+      <li><span class="method-sig">DeleteByEndpoint(ctx, userID, endpoint)</span><span class="method-desc">Removes the subscription for this user+endpoint pair.</span></li>
+      <li><span class="method-sig">ListByUserID(ctx, userID)</span><span class="method-desc">All active subscriptions for a user (they may have multiple devices/browsers).</span></li>
+    </ul>
+
+    <h2 id="tokens">RefreshTokenStore</h2>
+    <p>Implements server-side refresh token rotation with family-based revocation. A "family" is a chain of rotated tokens — if any token in the family is reused after being replaced, the entire family is revoked (detecting token theft).</p>
+    <ul class="method-list">
+      <li><span class="method-sig">Create(ctx, token)</span><span class="method-desc">Inserts a new refresh token row with a SHA-256 hash, family ID, and 7-day expiry.</span></li>
+      <li><span class="method-sig">ValidateAndRotate(ctx, hash)</span><span class="method-desc">Finds the token by hash, validates it's not expired/revoked, marks it revoked, returns the user ID and family ID so a new token can be issued for the same family.</span></li>
+      <li><span class="method-sig">Revoke(ctx, familyID)</span><span class="method-desc">Marks every token in a family as revoked (token reuse detection or explicit logout).</span></li>
+      <li><span class="method-sig">DeleteExpired(ctx)</span><span class="method-desc">Deletes rows older than their <code>expires_at</code> — run periodically by a cron job or startup task.</span></li>
+    </ul>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

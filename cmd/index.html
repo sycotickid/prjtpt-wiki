@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cmd/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../index.html">Overview</a>
+    <span class="sep">/</span>
+    <span class="current">cmd/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Directories</div>
+      <a href="index.html" class="active">&#128196; cmd/</a>
+      <a href="../internal/index.html">&#128230; internal/</a>
+      <div class="sidebar-sub">
+        <a href="../internal/auth/index.html">auth/</a>
+        <a href="../internal/config/index.html">config/</a>
+        <a href="../internal/email/index.html">email/</a>
+        <a href="../internal/handler/index.html">handler/</a>
+        <a href="../internal/health/index.html">health/</a>
+        <a href="../internal/logger/index.html">logger/</a>
+        <a href="../internal/middleware/index.html">middleware/</a>
+        <a href="../internal/presence/index.html">presence/</a>
+        <a href="../internal/server/index.html">server/</a>
+        <a href="../internal/storage/index.html">storage/</a>
+        <a href="../internal/store/index.html">store/</a>
+        <a href="../internal/validate/index.html">validate/</a>
+      </div>
+      <a href="../migrations/index.html">&#128200; migrations/</a>
+      <a href="../web/index.html">&#127760; web/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128196; Entry Point</div>
+      <h1>cmd/</h1>
+      <p>The <code>cmd/</code> directory contains the application's entry point following the standard Go project layout convention. Executable commands live here, each in their own subdirectory named after the binary they produce.</p>
+    </div>
+
+    <h2>Directory Structure</h2>
+    <table class="file-table">
+      <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>cmd/api/main.go</code></td><td class="desc">Application entry point — wires together config, logger, server, and graceful shutdown.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>cmd/api/main.go</h2>
+    <p><strong>Package:</strong> <code>main</code></p>
+    <p>This file is the only executable entry point for the PRJTPT API server. It is intentionally thin — its only job is to load configuration, construct the server, and manage the process lifecycle. All business logic lives in <code>internal/</code>.</p>
+
+    <h3>Startup Sequence</h3>
+    <ol style="color:var(--text-muted); margin: 12px 0 12px 24px; line-height: 2;">
+      <li>Call <code>config.Load()</code> to read all environment variables (exits on validation failure).</li>
+      <li>Construct a <code>zerolog.Logger</code> via <code>logger.New(cfg)</code>.</li>
+      <li>Call <code>server.New(cfg, log)</code> which builds the full router, middleware stack, stores, and handlers — and opens the PostgreSQL connection pool.</li>
+      <li>Register <code>os.Signal</code> listeners for <code>SIGINT</code> and <code>SIGTERM</code>.</li>
+      <li>Start listening on the configured address (default <code>:8080</code>) in a goroutine.</li>
+      <li>Block until a signal is received, then call <code>http.Server.Shutdown</code> with a 30-second context to drain in-flight requests before exiting.</li>
+    </ol>
+
+    <h3>Graceful Shutdown</h3>
+    <p>The 30-second drain window allows WebSocket connections and long-lived SSE streams to finish before the process exits. Caddy's upstream health checks ensure no new requests are routed to a draining instance.</p>
+
+    <pre><span class="cm">// Simplified representation of the startup logic</span>
+<span class="kw">func</span> <span class="fn">main</span>() {
+    cfg  := config.<span class="fn">Load</span>()
+    log  := logger.<span class="fn">New</span>(cfg)
+    srv  := server.<span class="fn">New</span>(cfg, log)
+
+    quit := <span class="fn">make</span>(<span class="kw">chan</span> os.Signal, <span class="nu">1</span>)
+    signal.<span class="fn">Notify</span>(quit, syscall.SIGINT, syscall.SIGTERM)
+
+    <span class="kw">go</span> srv.<span class="fn">ListenAndServe</span>()
+    &lt;-quit
+
+    ctx, cancel := context.<span class="fn">WithTimeout</span>(context.<span class="fn">Background</span>(), <span class="nu">30</span>*time.Second)
+    <span class="kw">defer</span> <span class="fn">cancel</span>()
+    srv.<span class="fn">Shutdown</span>(ctx)
+}</pre>
+
+    <div class="callout callout-tip">
+      <p><strong>Convention:</strong> <code>cmd/</code> packages should import from <code>internal/</code> but never the other way around. This enforces that the entry-point is just a composition root with no business logic of its own.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

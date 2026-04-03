@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/config/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">config/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="index.html" class="active">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#9881;&#65039; Package config</div>
+      <h1>internal/config/</h1>
+      <p>Single source of truth for all runtime configuration. Reads environment variables (with <code>.env</code> file fallback in development), validates required fields, and exposes a typed <code>Config</code> struct to the rest of the application.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>config.go</code></td><td class="desc">Defines the <code>Config</code> struct and the <code>Load()</code> function that populates it from the environment.</td></tr>
+        <tr><td><code>config_test.go</code></td><td class="desc">Unit tests that verify required-field validation and default values.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Config Struct</h2>
+    <p>All fields on the <code>Config</code> struct are populated from environment variables. Required fields cause <code>Load()</code> to return an error if missing.</p>
+
+    <h3>Core Fields</h3>
+    <table class="schema-table">
+      <thead><tr><th>Field</th><th>Env Var</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">AppEnv</td><td class="col-type">APP_ENV</td><td><span class="badge badge-gray">No</span></td><td class="col-desc">Runtime environment: <code>development</code> (default), <code>staging</code>, <code>production</code></td></tr>
+        <tr><td class="col-name">HTTPAddr</td><td class="col-type">HTTP_ADDR</td><td><span class="badge badge-gray">No</span></td><td class="col-desc">Bind address, e.g. <code>:8080</code> (default)</td></tr>
+        <tr><td class="col-name">AppBaseURL</td><td class="col-type">APP_BASE_URL</td><td><span class="badge badge-green">Yes</span></td><td class="col-desc">Public URL of the application, used in email links</td></tr>
+        <tr><td class="col-name">CORSOrigin</td><td class="col-type">CORS_ORIGIN</td><td><span class="badge badge-green">Yes</span></td><td class="col-desc">Single allowed CORS origin (no wildcards)</td></tr>
+        <tr><td class="col-name">DatabaseURL</td><td class="col-type">DATABASE_URL</td><td><span class="badge badge-green">Yes</span></td><td class="col-desc">PostgreSQL connection string (<code>postgres://user:pass@host/db</code>)</td></tr>
+        <tr><td class="col-name">JWTPrivateKey</td><td class="col-type">JWT_PRIVATE_KEY</td><td><span class="badge badge-green">Yes</span></td><td class="col-desc">RSA private key PEM — used to sign JWTs</td></tr>
+        <tr><td class="col-name">JWTPublicKey</td><td class="col-type">JWT_PUBLIC_KEY</td><td><span class="badge badge-green">Yes</span></td><td class="col-desc">RSA public key PEM — used to validate JWTs</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional Feature Flags</h3>
+    <table class="schema-table">
+      <thead><tr><th>Group</th><th>Fields</th><th>Phase</th></tr></thead>
+      <tbody>
+        <tr><td>SMTP Email</td><td class="col-desc"><code>SMTPHost</code>, <code>SMTPPort</code>, <code>SMTPUsername</code>, <code>SMTPPassword</code>, <code>SMTPFrom</code></td><td><span class="badge badge-green">Phase 1</span></td></tr>
+        <tr><td>S3 Storage</td><td class="col-desc"><code>S3Bucket</code>, <code>S3Endpoint</code>, <code>S3AccessKey</code>, <code>S3SecretKey</code></td><td><span class="badge badge-yellow">Phase 3</span></td></tr>
+        <tr><td>Web Push (VAPID)</td><td class="col-desc"><code>VAPIDPublicKey</code>, <code>VAPIDPrivateKey</code>, <code>VAPIDEmail</code></td><td><span class="badge badge-green">Phase 2</span></td></tr>
+        <tr><td>OAuth Google</td><td class="col-desc"><code>GoogleClientID</code>, <code>GoogleClientSecret</code></td><td><span class="badge badge-gray">Phase 7</span></td></tr>
+        <tr><td>OAuth GitHub</td><td class="col-desc"><code>GitHubClientID</code>, <code>GitHubClientSecret</code></td><td><span class="badge badge-gray">Phase 7</span></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Load() Function</h2>
+    <p><code>config.Load()</code> is called once at startup in <code>main()</code>. It:</p>
+    <ol style="color:var(--text-muted); margin: 12px 0 12px 24px; line-height: 2;">
+      <li>Calls <code>godotenv.Load()</code> to source a <code>.env</code> file if present (silently ignored in production).</li>
+      <li>Reads each environment variable with <code>os.Getenv</code>.</li>
+      <li>Returns an error listing every missing required variable so operators see all problems at once rather than fixing them one at a time.</li>
+    </ol>
+
+    <h2>Helper Methods</h2>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">IsDevelopment() bool</span>
+        <span class="method-desc">Returns true when <code>APP_ENV == "development"</code>. Used to enable hot-reload CSP, verbose logging, and <code>.env</code> loading.</span>
+      </li>
+      <li>
+        <span class="method-sig">IsProduction() bool</span>
+        <span class="method-desc">Returns true when <code>APP_ENV == "production"</code>. Enables HSTS, strict CSP, and JSON-only logging.</span>
+      </li>
+    </ul>
+
+    <div class="callout callout-warn">
+      <p><strong>Never commit secrets.</strong> The <code>.env</code> file is in <code>.gitignore</code>. Use <code>.env.example</code> as a template — it contains placeholder values and descriptions for every variable but no real secrets.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>
