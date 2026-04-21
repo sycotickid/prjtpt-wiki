@@ -4,7 +4,7 @@ Home page
 - [[Workouts]]
 - Ode [[Journal]]
 - [[_General/To Dos]]
-- [[Dev/Project Teapot/To Dos|To Dos]]
+- Prjtpt [[Dev/Project Teapot/To Dos|To Dos]]
 
 # Tasks Overview
 

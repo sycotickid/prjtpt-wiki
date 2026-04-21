@@ -10,7 +10,13 @@
 - [[Opening Sequence]]
 - [[Neo-Hylian]]
 
-### To Do
+## To Do
+```tasks
+not done
+path includes Dev/Ode to the Hyrule Fantasy/Journal
+```
+
+### Daily Notes
 9/22/25 Notes:
 Due to several factors, development is messy and unorganized. I need to step back and focus down on one aspect of the game at a time. I put character aside to work on environment. I know OttHF is too big of a project, so I need to stay organized or else nothing will ever get done.
 
@@ -160,3 +166,7 @@ Maybe this works by making it an auto intractable or maybe adding intractable lo
 - [ ]  Create improved mannequin to animate (not final, but also not naked)
 - [ ]  Draw out top down layout of [[Cove]] and surrounding area for modeling and gray box
 
+### 4/20/2026
+This page should be reorganized such that the newest entries are added at the top of the file and older entries get pushed lower and lower, staying at the bottom.
+
+- [x] Consolidate all to-do items and keep a todo list at the top of the page ✅ 2026-04-20

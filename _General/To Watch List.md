@@ -1,5 +1,14 @@
 - [ ] Something the Lord has Made
 
+### Movies
+- [ ] 
+
+### Shows
+- [ ] Breaking Bad
+
+### Videos
+- [ ] Game Grumps - Devil’s Third
+
 ### Anime
 - [ ] My Hero Academia
 - [ ] Fairy Tail (and 100YQ)
