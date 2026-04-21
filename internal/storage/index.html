@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/storage/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">storage/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="index.html" class="active">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128193; Package storage</div>
+      <h1>internal/storage/</h1>
+      <p>S3-compatible object storage client used for avatar image uploads. Built on AWS SDK v2, supporting any S3-compatible backend — AWS S3, Cloudflare R2, DigitalOcean Spaces, or MinIO in local development.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>s3.go</code></td><td class="desc">S3Client struct with upload, delete, and public URL generation methods.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>S3Client</h2>
+    <h3>Constructor</h3>
+    <pre><span class="kw">func</span> <span class="fn">New</span>(cfg *config.<span class="ty">Config</span>) (*<span class="ty">S3Client</span>, <span class="ty">error</span>)</pre>
+    <p>Initialises the AWS SDK v2 client with static credentials from config. If a custom <code>S3Endpoint</code> is set, the client uses <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/VirtualHosting.html">path-style addressing</a> for compatibility with MinIO and other self-hosted providers.</p>
+
+    <h3>Methods</h3>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">PutObject(ctx, key, contentType string, r io.Reader) error</span>
+        <span class="method-desc">Streams an object to the configured S3 bucket. The <code>key</code> is the object path within the bucket (e.g. <code>avatars/&lt;userID&gt;.webp</code>). The object is stored with the given content type and public-read ACL.</span>
+      </li>
+      <li>
+        <span class="method-sig">DeleteObject(ctx context.Context, key string) error</span>
+        <span class="method-desc">Removes an object from the bucket by key. Called when a user uploads a new avatar to clean up the old one, and when an account is deleted.</span>
+      </li>
+      <li>
+        <span class="method-sig">PublicURL(key string) string</span>
+        <span class="method-desc">Returns the public HTTPS URL for an object. Format depends on the provider — for AWS S3 it's <code>https://&lt;bucket&gt;.s3.&lt;region&gt;.amazonaws.com/&lt;key&gt;</code>; for custom endpoints it uses the endpoint URL directly.</span>
+      </li>
+    </ul>
+
+    <h2>Avatar Upload Flow</h2>
+    <pre><span class="cm">// In UsersHandler.UploadAvatar:</span>
+<span class="nu">1</span>. Validate Content-Type is image/webp, image/jpeg, or image/png
+<span class="nu">2</span>. Limit request body to 2MB with http.MaxBytesReader
+<span class="nu">3</span>. Generate object key: <span class="st">"avatars/"</span> + userID + extension
+<span class="nu">4</span>. s3.<span class="fn">PutObject</span>(ctx, key, contentType, r.Body)
+<span class="nu">5</span>. publicURL := s3.<span class="fn">PublicURL</span>(key)
+<span class="nu">6</span>. userStore.<span class="fn">UpdateProfile</span>(ctx, userID, <span class="st">""</span>, publicURL)
+<span class="nu">7</span>. Delete old avatar key if one existed</pre>
+
+    <h2>Local Development</h2>
+    <p>In development, the S3 fields in <code>.env</code> can point to a MinIO container. Add the following to <code>docker-compose.yml</code>:</p>
+    <pre><span class="co">minio</span>:
+  image: minio/minio
+  command: server /data --console-address <span class="st">":9001"</span>
+  environment:
+    MINIO_ROOT_USER: minioadmin
+    MINIO_ROOT_PASSWORD: minioadmin
+  ports:
+    - <span class="st">"9000:9000"</span>
+    - <span class="st">"9001:9001"</span></pre>
+    <p>Then set <code>S3_ENDPOINT=http://minio:9000</code> in your <code>.env</code>. If no S3 config is present, avatar upload will fail gracefully with a 503 and a descriptive error rather than panicking.</p>
+
+    <div class="callout callout-warn">
+      <p><strong>Phase 3 feature:</strong> S3 storage is gated behind Phase 3. The <code>storage</code> package exists and is wired in <code>server.New()</code>, but the avatar upload route may return a 503 if S3 credentials are not configured.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

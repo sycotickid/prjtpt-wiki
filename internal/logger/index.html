@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/logger/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">logger/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="index.html" class="active">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128220; Package logger</div>
+      <h1>internal/logger/</h1>
+      <p>Configures a <code>zerolog.Logger</code> instance tuned for the current environment. Development gets human-readable coloured output; staging and production get machine-parseable JSON at a higher log level.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>logger.go</code></td><td class="desc">Constructs and returns a configured <code>zerolog.Logger</code>.</td></tr>
+        <tr><td><code>logger_test.go</code></td><td class="desc">Tests that verify the correct log level and writer are used per environment.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Functions</h2>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">New(cfg *config.Config) zerolog.Logger</span>
+        <span class="method-desc">Returns a logger configured for the current environment. Passes <code>os.Stderr</code> as the writer.</span>
+      </li>
+      <li>
+        <span class="method-sig">NewWithWriter(cfg *config.Config, w io.Writer) zerolog.Logger</span>
+        <span class="method-desc">Like <code>New</code> but accepts a custom writer — used in tests to capture log output for assertions without writing to stderr.</span>
+      </li>
+    </ul>
+
+    <h2>Environment Behaviour</h2>
+    <table class="file-table">
+      <thead><tr><th>APP_ENV</th><th>Level</th><th>Format</th></tr></thead>
+      <tbody>
+        <tr><td><code>development</code></td><td><span class="badge badge-blue">DEBUG</span></td><td class="desc">Pretty-printed with colour, timestamps, and readable field names (zerolog ConsoleWriter)</td></tr>
+        <tr><td><code>staging</code></td><td><span class="badge badge-yellow">INFO</span></td><td class="desc">JSON to stderr — suitable for log aggregators</td></tr>
+        <tr><td><code>production</code></td><td><span class="badge badge-yellow">INFO</span></td><td class="desc">JSON to stderr — suitable for log aggregators</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Log Fields</h2>
+    <p>Every log entry includes a <code>service</code> field set to <code>"prjtpt-api"</code> and a <code>time</code> field in RFC3339 format. The request logging middleware (see <a href="../middleware/index.html">middleware/logger.go</a>) adds <code>method</code>, <code>path</code>, <code>status</code>, <code>latency_ms</code>, <code>ip</code>, and <code>request_id</code> to each HTTP log line.</p>
+
+    <h3>Example JSON log line (production)</h3>
+    <pre>{
+  <span class="st">"level"</span>:<span class="st">"info"</span>,
+  <span class="st">"service"</span>:<span class="st">"prjtpt-api"</span>,
+  <span class="st">"time"</span>:<span class="st">"2026-04-02T14:23:01Z"</span>,
+  <span class="st">"method"</span>:<span class="st">"POST"</span>,
+  <span class="st">"path"</span>:<span class="st">"/api/v1/auth/login"</span>,
+  <span class="st">"status"</span>:<span class="nu">200</span>,
+  <span class="st">"latency_ms"</span>:<span class="nu">42</span>,
+  <span class="st">"ip"</span>:<span class="st">"203.0.113.5"</span>,
+  <span class="st">"request_id"</span>:<span class="st">"abc123"</span>
+}</pre>
+
+    <div class="callout callout-info">
+      <p><strong>Why zerolog?</strong> zerolog is the fastest structured logger available in the Go ecosystem — its zero-allocation design means logging has negligible impact on request latency even at high throughput. JSON output integrates directly with log aggregators like Loki, Datadog, or CloudWatch without a parser plugin.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

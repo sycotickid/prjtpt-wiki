@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/handler/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">handler/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="index.html" class="active">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">On This Page</div>
+      <a href="#auth">auth.go</a>
+      <a href="#users">users.go</a>
+      <a href="#friends">friends.go</a>
+      <a href="#games">games.go</a>
+      <a href="#lobbies">lobbies.go</a>
+      <a href="#push">push.go</a>
+      <a href="#pages">pages.go</a>
+      <a href="#ws">ws.go</a>
+      <a href="#contact">contact.go</a>
+      <a href="#helpers">Helpers</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#127760; Package handler</div>
+      <h1>internal/handler/</h1>
+      <p>All HTTP request handlers. Each domain area has its own file containing a handler struct whose methods map 1:1 to route endpoints. Handlers decode requests, call the store or service layer, and encode responses — they contain no business logic of their own.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Handler Struct</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>auth.go</code></td><td><code>AuthHandler</code></td><td class="desc">Registration, login, email verification, password reset, token refresh, logout</td></tr>
+        <tr><td><code>users.go</code></td><td><code>UsersHandler</code></td><td class="desc">User profile, avatar upload, status update, user search</td></tr>
+        <tr><td><code>friends.go</code></td><td><code>FriendsHandler</code></td><td class="desc">Friend list, requests, accept/decline, remove, block</td></tr>
+        <tr><td><code>games.go</code></td><td><code>GamesHandler</code></td><td class="desc">Game catalogue — list all, get by slug</td></tr>
+        <tr><td><code>lobbies.go</code></td><td><code>LobbiesHandler</code></td><td class="desc">Lobby CRUD, membership, ready-check, chat, invite, start</td></tr>
+        <tr><td><code>push.go</code></td><td><code>PushHandler</code></td><td class="desc">Web Push subscription management (VAPID)</td></tr>
+        <tr><td><code>pages.go</code></td><td><code>PagesHandler</code></td><td class="desc">Server-rendered HTML pages (landing, auth pages, products, lobby)</td></tr>
+        <tr><td><code>ws.go</code></td><td><code>WSHandler</code></td><td class="desc">WebSocket upgrade for the presence hub</td></tr>
+        <tr><td><code>contact.go</code></td><td><code>ContactHandler</code></td><td class="desc">Public contact form with rate limiting</td></tr>
+        <tr><td><code>renderer.go</code></td><td>—</td><td class="desc">Template parsing, cloning, and rendering helper</td></tr>
+        <tr><td><code>respond.go</code></td><td>—</td><td class="desc">JSON response helper functions</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="auth">auth.go — AuthHandler</h2>
+    <p>Manages the full authentication lifecycle. Tokens are issued by the <a href="../auth/index.html">auth package</a>; user records are persisted via <a href="../store/index.html">UserStore</a> and <a href="../store/index.html">RefreshTokenStore</a>.</p>
+    <table class="route-table">
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/register</td><td class="route-desc">Validates email/password/displayName, bcrypt-hashes the password, creates the user, issues a verification token, sends a verification email.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/login</td><td class="route-desc">Verifies credentials, checks email is verified, issues a 15-min JWT access token and sets an HttpOnly refresh token cookie.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/verify-email?token=...</td><td class="route-desc">Hashes the presented token, looks it up in the DB, marks the user as verified.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/resend-verification</td><td class="route-desc">Issues a new verification token and re-sends the email (rate-limited).</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/forgot-password</td><td class="route-desc">Finds user by email, generates a password-reset token (1-hour TTL), sends reset email. Always returns 200 to avoid user enumeration.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/reset-password</td><td class="route-desc">Validates the reset token, hashes the new password, updates the user, clears the token.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/auth/refresh</td><td class="route-desc">Reads the refresh cookie, validates and rotates the token (issues a new one, revokes the old), returns a new access token. Detects token reuse (family revocation).</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/auth/session</td><td class="route-desc">Revokes the current refresh token family, clears the cookie.</td></tr>
+    </table>
+
+    <h2 id="users">users.go — UsersHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/users/me</td><td class="route-desc">Returns the authenticated user's profile (ID, email, displayName, avatarURL, status, notificationsEnabled).</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/users/me</td><td class="route-desc">Updates displayName. Validates uniqueness against the DB before saving.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/users/me/avatar</td><td class="route-desc">Accepts multipart image upload (max 2MB, JPEG/PNG/WebP). Streams to S3, updates avatarURL in DB, deletes old object.</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/users/me/status</td><td class="route-desc">Updates status (online/offline/away/in_game/in_lobby/custom) and optional customStatus string. Broadcasts a status_change event to friends via the presence hub.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/users/search?q=...</td><td class="route-desc">Trigram-similarity search over display names. Returns up to 20 matches. Excludes blocked users.</td></tr>
+    </table>
+
+    <h2 id="friends">friends.go — FriendsHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/friends</td><td class="route-desc">Returns accepted friends with their live online status (from presence hub).</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/friends/requests</td><td class="route-desc">Returns incoming pending friend requests.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/friends/requests</td><td class="route-desc">Creates a pending friendship record. Notifies the recipient via presence hub (friend_request event).</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/friends/requests/{id}</td><td class="route-desc">Accepts or declines a request. Notifies the requester via presence hub (friend_accepted or friend_declined).</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/friends/{id}</td><td class="route-desc">Removes an accepted friendship. Notifies via presence hub (friend_removed).</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/friends/{id}/block</td><td class="route-desc">Blocks a user — they can no longer send requests or find you in search.</td></tr>
+    </table>
+
+    <h2 id="games">games.go — GamesHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/games</td><td class="route-desc">Returns all active games from the catalogue (seeded by migration 000011).</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/games/{slug}</td><td class="route-desc">Returns a single game by URL slug (e.g. <code>/api/v1/games/typing-speed</code>).</td></tr>
+    </table>
+
+    <h2 id="lobbies">lobbies.go — LobbiesHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/lobbies</td><td class="route-desc">Creates a lobby for a specific game. The creator is automatically added as the host/first member.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/lobbies</td><td class="route-desc">Lists all public lobbies with status "waiting".</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/lobbies/{id}</td><td class="route-desc">Returns a lobby with its full member list.</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/lobbies/{id}</td><td class="route-desc">Soft-deletes the lobby (sets closed_at). Only the host can do this.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/lobbies/{id}/join</td><td class="route-desc">Adds the authenticated user to the lobby (if under max_players and status is "waiting").</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/lobbies/{id}/members/me</td><td class="route-desc">Removes the user from the lobby. If the host leaves, a new host is assigned.</td></tr>
+      <tr><td><span class="method PATCH">PATCH</span></td><td class="route-path">/api/v1/lobbies/{id}/members/me</td><td class="route-desc">Toggles the user's is_ready flag. Emits lobby_all_ready event if all members are ready.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/lobbies/{id}/invites</td><td class="route-desc">Sends a lobby invite to a friend via the presence hub (lobby_invite event).</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/lobbies/{id}/start</td><td class="route-desc">Host-only. Changes lobby status to in_game, creates a game_session record, emits lobby_game_starting event.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/lobbies/{id}/messages</td><td class="route-desc">Posts a chat message to the lobby channel. Broadcasts to all connected lobby members.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/lobbies/{id}/messages</td><td class="route-desc">Returns all messages in the lobby's chat channel, joined with sender profile.</td></tr>
+    </table>
+
+    <h2 id="push">push.go — PushHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/api/v1/push/vapid-public-key</td><td class="route-desc">Returns the VAPID public key so the browser can subscribe to push notifications.</td></tr>
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/api/v1/push/subscribe</td><td class="route-desc">Upserts a push subscription (endpoint + p256dh + auth) for the authenticated user.</td></tr>
+      <tr><td><span class="method DELETE">DELETE</span></td><td class="route-path">/api/v1/push/subscribe</td><td class="route-desc">Removes a push subscription by endpoint.</td></tr>
+    </table>
+
+    <h2 id="pages">pages.go — PagesHandler</h2>
+    <p>Renders server-side HTML pages using Go's <code>html/template</code> engine via the <code>renderer.go</code> helper. All pages use the base layout in <code>web/templates/index.html</code>.</p>
+    <table class="route-table">
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/</td><td class="route-desc">Landing page with GitHub commit feed and product showcase.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/signin</td><td class="route-desc">Sign-in form page.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/register</td><td class="route-desc">Registration form page.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/verify-pending</td><td class="route-desc">Tells the user to check their email after registration.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/forgot-password</td><td class="route-desc">Forgot password form page.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/auth/reset-password</td><td class="route-desc">Reset password form page (reads token from query string).</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/contact</td><td class="route-desc">Contact form page.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/products</td><td class="route-desc">Games catalogue / "solutions" page.</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">/lobby/{id}</td><td class="route-desc">Pre-game lobby room page (Datastar-driven, live updates via WebSocket).</td></tr>
+      <tr><td><span class="method GET">GET</span></td><td class="route-path">*</td><td class="route-desc">Catch-all: serves the Datastar SPA shell for client-side routes not explicitly handled above.</td></tr>
+    </table>
+
+    <h2 id="ws">ws.go — WSHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method WS">WS</span></td><td class="route-path">/ws/presence?token=&lt;JWT&gt;</td><td class="route-desc">Validates the JWT query parameter, upgrades to WebSocket, registers the client with the presence hub. The connection stays open until the client disconnects or the server shuts down.</td></tr>
+    </table>
+
+    <h2 id="contact">contact.go — ContactHandler</h2>
+    <table class="route-table">
+      <tr><td><span class="method POST">POST</span></td><td class="route-path">/contact</td><td class="route-desc">Rate-limited (5 submissions per IP per hour). Accepts name, email, message. Sends to the configured SMTP recipient. Returns a Datastar SSE fragment to update the form UI without a page reload.</td></tr>
+    </table>
+
+    <h2 id="helpers">Helper Files</h2>
+
+    <h3>renderer.go</h3>
+    <p>Parses all HTML templates once at server startup and caches them. For each request, it clones the base layout and executes the page-specific template into it. Cloning ensures each request gets its own template namespace — concurrent rendering is safe without a mutex.</p>
+
+    <h3>respond.go</h3>
+    <p>Helper functions used by all handlers to write consistent JSON responses:</p>
+    <ul class="method-list">
+      <li><span class="method-sig">jsonOK(w, v)</span><span class="method-desc">200 OK with JSON-encoded <code>v</code></span></li>
+      <li><span class="method-sig">jsonCreated(w, v)</span><span class="method-desc">201 Created with JSON-encoded <code>v</code></span></li>
+      <li><span class="method-sig">jsonError(w, status, msg)</span><span class="method-desc">Error envelope: <code>{"error": "msg"}</code></span></li>
+      <li><span class="method-sig">jsonValidationError(w, fields)</span><span class="method-desc">422 with per-field validation errors: <code>{"error": "validation failed", "fields": {...}}</code></span></li>
+    </ul>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

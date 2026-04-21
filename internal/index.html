@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../index.html">Overview</a>
+    <span class="sep">/</span>
+    <span class="current">internal/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Directories</div>
+      <a href="../cmd/index.html">&#128196; cmd/</a>
+      <a href="index.html" class="active">&#128230; internal/</a>
+      <div class="sidebar-sub">
+        <a href="auth/index.html">auth/</a>
+        <a href="config/index.html">config/</a>
+        <a href="email/index.html">email/</a>
+        <a href="handler/index.html">handler/</a>
+        <a href="health/index.html">health/</a>
+        <a href="logger/index.html">logger/</a>
+        <a href="middleware/index.html">middleware/</a>
+        <a href="presence/index.html">presence/</a>
+        <a href="server/index.html">server/</a>
+        <a href="storage/index.html">storage/</a>
+        <a href="store/index.html">store/</a>
+        <a href="validate/index.html">validate/</a>
+      </div>
+      <a href="../migrations/index.html">&#128200; migrations/</a>
+      <a href="../web/index.html">&#127760; web/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128230; Private Packages</div>
+      <h1>internal/</h1>
+      <p>The <code>internal/</code> directory contains all private application packages. Go enforces that code inside <code>internal/</code> cannot be imported by packages outside the module root — this is not a convention but a compiler rule. All business logic, data access, and HTTP handling lives here.</p>
+    </div>
+
+    <h2>Package Overview</h2>
+    <div class="cards">
+      <a class="card" href="auth/index.html">
+        <div class="card-icon">&#128272;</div>
+        <div class="card-title">auth/</div>
+        <div class="card-desc">JWT RS256 tokens, bcrypt password hashing, cryptographic token generation</div>
+      </a>
+      <a class="card" href="config/index.html">
+        <div class="card-icon">&#9881;&#65039;</div>
+        <div class="card-title">config/</div>
+        <div class="card-desc">Environment variable loading and validation — single source of runtime config</div>
+      </a>
+      <a class="card" href="email/index.html">
+        <div class="card-icon">&#128140;</div>
+        <div class="card-title">email/</div>
+        <div class="card-desc">Transactional SMTP mailer for verification and password-reset emails</div>
+      </a>
+      <a class="card" href="handler/index.html">
+        <div class="card-icon">&#127760;</div>
+        <div class="card-title">handler/</div>
+        <div class="card-desc">All HTTP request handlers — auth, users, friends, games, lobbies, pages, WebSocket</div>
+      </a>
+      <a class="card" href="health/index.html">
+        <div class="card-icon">&#10084;&#65039;</div>
+        <div class="card-title">health/</div>
+        <div class="card-desc">GET /health liveness probe used by Docker and load balancers</div>
+      </a>
+      <a class="card" href="logger/index.html">
+        <div class="card-icon">&#128220;</div>
+        <div class="card-title">logger/</div>
+        <div class="card-desc">zerolog configuration — pretty console in dev, JSON in production</div>
+      </a>
+      <a class="card" href="middleware/index.html">
+        <div class="card-icon">&#128101;</div>
+        <div class="card-title">middleware/</div>
+        <div class="card-desc">CORS, request logging, OWASP security headers, JWT auth enforcement, CSRF</div>
+      </a>
+      <a class="card" href="presence/index.html">
+        <div class="card-icon">&#128247;</div>
+        <div class="card-title">presence/</div>
+        <div class="card-desc">WebSocket hub for real-time presence events — status changes, invites, lobby events</div>
+      </a>
+      <a class="card" href="server/index.html">
+        <div class="card-icon">&#128268;</div>
+        <div class="card-title">server/</div>
+        <div class="card-desc">Router assembly, middleware stack, dependency injection, PostgreSQL pool</div>
+      </a>
+      <a class="card" href="storage/index.html">
+        <div class="card-icon">&#128193;</div>
+        <div class="card-title">storage/</div>
+        <div class="card-desc">S3-compatible object storage client (AWS SDK v2) for avatar uploads</div>
+      </a>
+      <a class="card" href="store/index.html">
+        <div class="card-icon">&#128202;</div>
+        <div class="card-title">store/</div>
+        <div class="card-desc">Database access layer — one store struct per domain entity, parameterized queries</div>
+      </a>
+      <a class="card" href="validate/index.html">
+        <div class="card-icon">&#10003;</div>
+        <div class="card-title">validate/</div>
+        <div class="card-desc">Field-level input validators for email, password, and display name</div>
+      </a>
+    </div>
+
+    <h2>Design Principles</h2>
+
+    <h3>Dependency Injection via Constructor</h3>
+    <p>Every package exposes a constructor function (e.g. <code>auth.NewJWTService</code>, <code>store.NewUserStore</code>) that accepts its dependencies explicitly. There is no global state or <code>init()</code> magic. <code>server.New()</code> acts as the composition root, wiring everything together.</p>
+
+    <h3>Context Propagation</h3>
+    <p>All store methods accept <code>context.Context</code> as their first argument, enabling request-scoped cancellation and timeout propagation from the HTTP layer down to database queries.</p>
+
+    <h3>Parameterized Queries</h3>
+    <p>Every database query uses <code>pgx/v5</code> parameterized arguments — no string interpolation, no <code>fmt.Sprintf</code> in SQL. This eliminates SQL injection at the architecture level rather than relying on developer discipline.</p>
+
+    <h3>Domain Layer (store/)</h3>
+    <p>Store structs own their database queries. Handlers call stores; stores do not call handlers. This one-way dependency keeps the data access layer independently testable.</p>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

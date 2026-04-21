@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/presence/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">presence/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="../health/index.html">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="index.html" class="active">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#128247; Package presence</div>
+      <h1>internal/presence/</h1>
+      <p>Implements a WebSocket-based real-time presence hub. Connected clients receive live events about their friends' status changes, friend requests, lobby invites, and lobby activity. The hub is the central nervous system for all real-time social features.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>hub.go</code></td><td class="desc">Hub and Client structs — connection lifecycle, event broadcasting, offline grace period.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Architecture</h2>
+    <pre><span class="cm">Client A (WebSocket) ──► Hub ──► broadcast to Client B, C, D
+                          │
+                          ├── clientsByUserID map[string][]*Client
+                          ├── register / unregister channels
+                          └── offline grace timers (30s)</span></pre>
+
+    <p>The <strong>Hub</strong> runs in a single goroutine, processing registrations, unregistrations, and broadcast requests via channels. This single-writer pattern means no mutex is needed on the client maps.</p>
+    <p>Each <strong>Client</strong> runs two goroutines: a reader (listens for ping/pong frames and client disconnect) and a writer (drains an outbound message queue). The client is unregistered when either goroutine exits.</p>
+
+    <h2>Hub</h2>
+    <h3>Constructor</h3>
+    <pre><span class="kw">func</span> <span class="fn">NewHub</span>(friendStore <span class="ty">FriendStore</span>, log zerolog.<span class="ty">Logger</span>) *<span class="ty">Hub</span></pre>
+
+    <h3>Methods</h3>
+    <ul class="method-list">
+      <li>
+        <span class="method-sig">Run()</span>
+        <span class="method-desc">Starts the hub event loop in a goroutine. Must be called once at server startup. Processes register, unregister, and broadcast channel messages.</span>
+      </li>
+      <li>
+        <span class="method-sig">Register(client *Client)</span>
+        <span class="method-desc">Adds a client to the hub and cancels any pending offline grace timer for the user. Emits a <code>status_change → online</code> event to the user's friends.</span>
+      </li>
+      <li>
+        <span class="method-sig">Unregister(client *Client)</span>
+        <span class="method-desc">Starts the 30-second offline grace period. If no other connection from the same user registers within that window, the user is marked offline and friends are notified.</span>
+      </li>
+      <li>
+        <span class="method-sig">BroadcastToUser(userID string, event PresenceEvent)</span>
+        <span class="method-desc">Sends an event to all WebSocket connections belonging to a specific user (they may have multiple tabs open).</span>
+      </li>
+      <li>
+        <span class="method-sig">BroadcastToFriends(userID string, event PresenceEvent)</span>
+        <span class="method-desc">Looks up the user's friend list, then calls <code>BroadcastToUser</code> for each friend that is currently connected.</span>
+      </li>
+    </ul>
+
+    <h2>PresenceEvent</h2>
+    <p>The JSON payload sent over every WebSocket connection. The <code>type</code> field determines which other fields are populated.</p>
+
+    <h3>Event Types</h3>
+    <table class="schema-table">
+      <thead><tr><th>Type</th><th>Triggered When</th><th>Key Fields</th></tr></thead>
+      <tbody>
+        <tr><td class="col-name">status_change</td><td class="col-desc">A friend connects, disconnects, or changes their status</td><td class="col-type">UserID, Status, CustomStatus</td></tr>
+        <tr><td class="col-name">friend_request</td><td class="col-desc">Another user sends a friend request</td><td class="col-type">UserID, DisplayName, FriendshipID</td></tr>
+        <tr><td class="col-name">friend_accepted</td><td class="col-desc">A pending friend request is accepted</td><td class="col-type">UserID, DisplayName, AvatarURL</td></tr>
+        <tr><td class="col-name">friend_declined</td><td class="col-desc">A pending friend request is declined</td><td class="col-type">FriendshipID</td></tr>
+        <tr><td class="col-name">friend_removed</td><td class="col-desc">A friendship is removed</td><td class="col-type">UserID</td></tr>
+        <tr><td class="col-name">lobby_invite</td><td class="col-desc">A friend invites you to a lobby</td><td class="col-type">LobbyID, UserID, DisplayName</td></tr>
+        <tr><td class="col-name">lobby_message</td><td class="col-desc">A message is posted in a shared lobby</td><td class="col-type">LobbyID, MessageID, MessageBody, SentAt</td></tr>
+        <tr><td class="col-name">lobby_member_joined</td><td class="col-desc">A player joins the lobby</td><td class="col-type">LobbyID, UserID, DisplayName</td></tr>
+        <tr><td class="col-name">lobby_member_left</td><td class="col-desc">A player leaves the lobby</td><td class="col-type">LobbyID, UserID</td></tr>
+        <tr><td class="col-name">lobby_ready_changed</td><td class="col-desc">A player toggles their ready state</td><td class="col-type">LobbyID, UserID, IsReady</td></tr>
+        <tr><td class="col-name">lobby_all_ready</td><td class="col-desc">All players in a lobby are ready</td><td class="col-type">LobbyID</td></tr>
+        <tr><td class="col-name">lobby_game_starting</td><td class="col-desc">The host starts the game</td><td class="col-type">LobbyID, GameSessionID</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Offline Grace Period</h2>
+    <p>When a client disconnects (e.g. page refresh, network blip), a 30-second timer starts before friends are notified that the user went offline. If the user reconnects within that window, the timer is cancelled and no offline event is emitted. This prevents notification spam from brief disconnections.</p>
+
+    <h2>WebSocket Endpoint</h2>
+    <p>Clients connect to <code>GET /ws/presence?token=&lt;JWT&gt;</code>. The JWT is validated before the WebSocket upgrade is performed. The <code>gorilla/websocket</code> library handles the HTTP → WebSocket protocol upgrade, ping/pong keepalive, and graceful close frames.</p>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

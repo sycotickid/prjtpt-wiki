@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>internal/health/ — PRJTPT Docs</title>
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="../../index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <a href="../../index.html">Overview</a>
+    <span class="sep">/</span>
+    <a href="../index.html">internal/</a>
+    <span class="sep">/</span>
+    <span class="current">health/</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="../../index.html">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">internal/</div>
+      <a href="../auth/index.html">auth/</a>
+      <a href="../config/index.html">config/</a>
+      <a href="../email/index.html">email/</a>
+      <a href="../handler/index.html">handler/</a>
+      <a href="index.html" class="active">health/</a>
+      <a href="../logger/index.html">logger/</a>
+      <a href="../middleware/index.html">middleware/</a>
+      <a href="../presence/index.html">presence/</a>
+      <a href="../server/index.html">server/</a>
+      <a href="../storage/index.html">storage/</a>
+      <a href="../store/index.html">store/</a>
+      <a href="../validate/index.html">validate/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#10084;&#65039; Package health</div>
+      <h1>internal/health/</h1>
+      <p>Provides the <code>GET /health</code> endpoint used by Docker Compose health checks, load balancers, and orchestrators to determine if the application instance is ready to serve traffic.</p>
+    </div>
+
+    <h2>Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>health.go</code></td><td class="desc">Handler that pings the database and returns a JSON health status response.</td></tr>
+        <tr><td><code>health_test.go</code></td><td class="desc">Unit tests for the health handler using a mock database pinger.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Endpoint</h2>
+    <table class="route-table">
+      <tr>
+        <td><span class="method GET">GET</span></td>
+        <td class="route-path">/health</td>
+        <td class="route-desc">Returns <code>200 OK</code> with JSON body if the server and database are reachable. Returns <code>503 Service Unavailable</code> if the database ping fails.</td>
+      </tr>
+    </table>
+
+    <h3>Response Body (healthy)</h3>
+    <pre>{
+  <span class="st">"status"</span>: <span class="st">"ok"</span>,
+  <span class="st">"database"</span>: <span class="st">"ok"</span>
+}</pre>
+
+    <h3>Response Body (unhealthy)</h3>
+    <pre>{
+  <span class="st">"status"</span>: <span class="st">"degraded"</span>,
+  <span class="st">"database"</span>: <span class="st">"unreachable"</span>
+}</pre>
+
+    <h2>How It's Used</h2>
+    <p>The health endpoint is consumed by multiple layers of the stack:</p>
+    <ul style="color:var(--text-muted); margin: 12px 0 12px 24px; line-height: 2.2;">
+      <li><strong>Docker Compose:</strong> The <code>api</code> service defines <code>test: wget -q -O- http://localhost:8080/health</code> as its healthcheck. Other services that depend on the API wait for this to pass.</li>
+      <li><strong>Caddy:</strong> Excludes <code>/health</code> from access logging to avoid cluttering logs with probe noise.</li>
+      <li><strong>Orchestrators:</strong> Kubernetes or ECS can use this endpoint as a readiness probe. A failing database will surface the instance as not-ready and stop routing traffic to it.</li>
+    </ul>
+
+    <div class="callout callout-info">
+      <p><strong>Readiness vs liveness:</strong> This endpoint acts as both. It's "live" if the HTTP server responds, and "ready" only if the database ping succeeds. In a Kubernetes deployment you might split these — the liveness probe would hit any route, and the readiness probe would hit <code>/health</code>.</p>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <a href="../../index.html" style="color:var(--text-dim)">Back to overview</a>
+</footer>
+
+</body>
+</html>

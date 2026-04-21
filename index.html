@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRJTPT — Documentation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="topbar-logo" href="index.html">PRJTPT <span>docs</span></a>
+  <nav class="breadcrumb">
+    <span class="current">Overview</span>
+  </nav>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Navigation</div>
+      <a href="index.html" class="active">&#127968; Overview</a>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-heading">Directories</div>
+      <a href="cmd/index.html">&#128196; cmd/</a>
+      <a href="internal/index.html">&#128230; internal/</a>
+      <div class="sidebar-sub">
+        <a href="internal/auth/index.html">auth/</a>
+        <a href="internal/config/index.html">config/</a>
+        <a href="internal/email/index.html">email/</a>
+        <a href="internal/handler/index.html">handler/</a>
+        <a href="internal/health/index.html">health/</a>
+        <a href="internal/logger/index.html">logger/</a>
+        <a href="internal/middleware/index.html">middleware/</a>
+        <a href="internal/presence/index.html">presence/</a>
+        <a href="internal/server/index.html">server/</a>
+        <a href="internal/storage/index.html">storage/</a>
+        <a href="internal/store/index.html">store/</a>
+        <a href="internal/validate/index.html">validate/</a>
+      </div>
+      <a href="migrations/index.html">&#128200; migrations/</a>
+      <a href="web/index.html">&#127760; web/</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div class="tag">&#127381; Project Teapot</div>
+      <h1>PRJTPT Documentation</h1>
+      <p>PRJTPT (Project Teapot) is a browser-based multiplayer gaming platform designed to operate behind corporate firewalls by presenting itself as productivity software. All game state is server-authoritative, computed in Go, and streamed to clients over HTTP/3 using WebTransport.</p>
+    </div>
+
+    <h2>What is PRJTPT?</h2>
+    <p>PRJTPT delivers real-time multiplayer games entirely through a web browser — no installs, no plugins. The platform uses a hypermedia-first architecture (<strong>Datastar</strong>) so pages feel like a modern SPA while remaining fully server-rendered. Game logic runs on the server and is broadcast to clients, eliminating cheating at the source.</p>
+    <p>The name is a reference to <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/418" style="color:var(--accent)">HTTP 418 I'm a teapot</a> — a playful acknowledgment that the application masquerades as corporate tooling while actually being a gaming platform.</p>
+
+    <div class="stack-grid">
+      <div class="stack-item"><div class="stack-label">Backend</div><div class="stack-value">Go 1.25 + chi</div></div>
+      <div class="stack-item"><div class="stack-label">Frontend</div><div class="stack-value">Datastar</div></div>
+      <div class="stack-item"><div class="stack-label">Transport</div><div class="stack-value">WebTransport / HTTP3</div></div>
+      <div class="stack-item"><div class="stack-label">Database</div><div class="stack-value">PostgreSQL 16</div></div>
+      <div class="stack-item"><div class="stack-label">Auth</div><div class="stack-value">JWT RS256 + bcrypt</div></div>
+      <div class="stack-item"><div class="stack-label">Storage</div><div class="stack-value">S3-compatible</div></div>
+      <div class="stack-item"><div class="stack-label">Proxy</div><div class="stack-value">Caddy 2 (HTTP/3)</div></div>
+      <div class="stack-item"><div class="stack-label">Container</div><div class="stack-value">Docker Compose</div></div>
+    </div>
+
+    <h2>Architecture Overview</h2>
+    <p>The application follows a layered architecture with strict separation between configuration, transport, business logic, and data access. The server is assembled via dependency injection in <code>internal/server/server.go</code> — stores are created, injected into handlers, and handlers are registered on the router.</p>
+
+    <pre><span class="cm">┌──────────────────────────────────────────────┐
+│                  Caddy 2                     │  HTTP/3, TLS, Static files
+└───────────────────┬──────────────────────────┘
+                    │ Reverse proxy
+┌───────────────────▼──────────────────────────┐
+│               Go HTTP Server                 │  chi router
+│  ┌─────────────────────────────────────────┐ │
+│  │            Middleware Stack             │ │  CORS · Auth · CSRF · Security
+│  └───────────────────┬─────────────────────┘ │
+│  ┌──────────┬────────┴────────┬────────────┐ │
+│  │  Pages   │   REST API      │  WebSocket  │ │
+│  │ Handler  │   Handlers      │   Handler   │ │
+│  └──────────┴────────┬────────┴────────────┘ │
+│  ┌──────────────────▼─────────────────────┐  │
+│  │           Store Layer (pgx)            │  │  Users · Friends · Games · …
+│  └──────────────────┬─────────────────────┘  │
+└─────────────────────┼────────────────────────┘
+                      │
+┌─────────────────────▼────────────────────────┐
+│             PostgreSQL 16                    │  11 migrations
+└──────────────────────────────────────────────┘</span></pre>
+
+    <h2>Project Structure</h2>
+    <p>Click any directory to explore its contents in detail.</p>
+
+    <table class="file-table">
+      <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><a href="cmd/index.html">cmd/api/</a></td><td class="desc">Application entry point — initialises config, logger, server, and handles graceful shutdown.</td></tr>
+        <tr><td><a href="internal/index.html">internal/</a></td><td class="desc">All private application packages. Never imported by external code.</td></tr>
+        <tr><td><a href="internal/auth/index.html">internal/auth/</a></td><td class="desc">JWT issuance &amp; validation, bcrypt password hashing, cryptographic token generation.</td></tr>
+        <tr><td><a href="internal/config/index.html">internal/config/</a></td><td class="desc">Environment variable loading, validation, and runtime configuration struct.</td></tr>
+        <tr><td><a href="internal/email/index.html">internal/email/</a></td><td class="desc">Transactional email mailer (SMTP). Sends verification and password-reset emails.</td></tr>
+        <tr><td><a href="internal/handler/index.html">internal/handler/</a></td><td class="desc">All HTTP request handlers: auth, users, friends, games, lobbies, push, pages, WebSocket.</td></tr>
+        <tr><td><a href="internal/health/index.html">internal/health/</a></td><td class="desc">Liveness and readiness probe endpoint (<code>GET /health</code>).</td></tr>
+        <tr><td><a href="internal/logger/index.html">internal/logger/</a></td><td class="desc">Structured zerolog configuration — pretty in dev, JSON in production.</td></tr>
+        <tr><td><a href="internal/middleware/index.html">internal/middleware/</a></td><td class="desc">HTTP middleware: CORS, request logging, OWASP security headers, JWT auth, CSRF.</td></tr>
+        <tr><td><a href="internal/presence/index.html">internal/presence/</a></td><td class="desc">WebSocket hub for real-time presence events (status changes, lobby invites, etc.).</td></tr>
+        <tr><td><a href="internal/server/index.html">internal/server/</a></td><td class="desc">Router wiring, dependency injection assembly, PostgreSQL connection pool.</td></tr>
+        <tr><td><a href="internal/storage/index.html">internal/storage/</a></td><td class="desc">S3-compatible object storage client (avatar uploads via AWS SDK v2).</td></tr>
+        <tr><td><a href="internal/store/index.html">internal/store/</a></td><td class="desc">Database access layer — one store per domain entity (users, friends, games, etc.).</td></tr>
+        <tr><td><a href="internal/validate/index.html">internal/validate/</a></td><td class="desc">Field-level input validation helpers (email, password, display name).</td></tr>
+        <tr><td><a href="migrations/index.html">migrations/</a></td><td class="desc">11 PostgreSQL migration pairs (up/down) defining the full database schema.</td></tr>
+        <tr><td><a href="web/index.html">web/</a></td><td class="desc">Server-rendered HTML templates and static assets (CSS, JS, service worker, fonts).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Root Configuration Files</h2>
+    <table class="file-table">
+      <thead><tr><th>File</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>go.mod</code> / <code>go.sum</code></td><td class="desc">Go module definition and dependency lock file.</td></tr>
+        <tr><td><code>Dockerfile</code></td><td class="desc">Multi-stage build: Go builder (golang:1.25-alpine) → distroless runtime image.</td></tr>
+        <tr><td><code>docker-compose.yml</code></td><td class="desc">Development stack: postgres, migrator (one-shot), api (Air live-reload), Caddy proxy.</td></tr>
+        <tr><td><code>Caddyfile</code></td><td class="desc">Caddy 2 reverse proxy config — HTTP/3, TLS, static serving, WebTransport routes.</td></tr>
+        <tr><td><code>Makefile</code></td><td class="desc">Developer shortcuts: <code>make up</code>, <code>make test</code>, <code>make lint</code>, <code>make migrate-up</code>, etc.</td></tr>
+        <tr><td><code>.env.example</code></td><td class="desc">Template listing all required and optional environment variables with descriptions.</td></tr>
+        <tr><td><code>README.md</code></td><td class="desc">Comprehensive project README — setup, architecture, phase roadmap.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Development Phases</h2>
+    <table class="file-table">
+      <thead><tr><th>Phase</th><th>Status</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 0</td><td><span class="badge badge-green">Complete</span></td><td class="desc">Infrastructure, CI/CD, Docker, Caddy, database migrations</td></tr>
+        <tr><td>Phase 1</td><td><span class="badge badge-green">Complete</span></td><td class="desc">Auth (register, login, email verify, password reset, JWT), user profiles, shell UI</td></tr>
+        <tr><td>Phase 2</td><td><span class="badge badge-green">Complete</span></td><td class="desc">Friends system, real-time presence (WebSocket hub), Web Push notifications</td></tr>
+        <tr><td>Phase 3</td><td><span class="badge badge-yellow">Planned</span></td><td class="desc">Game lobbies, pre-game chat, lobby invites, ready-check, S3 avatar uploads</td></tr>
+        <tr><td>Phase 4</td><td><span class="badge badge-gray">Future</span></td><td class="desc">WebTransport game sessions, Protocol Buffers, Three.js + Jolt WASM renderer</td></tr>
+        <tr><td>Phase 5</td><td><span class="badge badge-gray">Future</span></td><td class="desc">Teams, team chat, persistent leaderboards</td></tr>
+        <tr><td>Phase 6</td><td><span class="badge badge-gray">Future</span></td><td class="desc">Spectator mode, replays</td></tr>
+        <tr><td>Phase 7</td><td><span class="badge badge-gray">Future</span></td><td class="desc">OAuth 2.0 (Google &amp; GitHub PKCE login)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Security Posture</h2>
+    <div class="callout callout-security">
+      <p><strong>OWASP Top 10 mitigations are implemented throughout.</strong> Parameterized queries prevent SQL injection; RS256 JWTs (15-min TTL) with server-side refresh-token rotation prevent session theft; double-submit CSRF cookies; OWASP security headers including strict CSP; bcrypt (cost ≥ 12); SHA-256 token hashing at rest.</p>
+    </div>
+
+    <h2>Key Dependencies</h2>
+    <table class="file-table">
+      <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>go-chi/chi/v5</code></td><td class="desc">Lightweight HTTP router with middleware support</td></tr>
+        <tr><td><code>jackc/pgx/v5</code></td><td class="desc">Native PostgreSQL driver with connection pooling</td></tr>
+        <tr><td><code>golang-jwt/jwt/v5</code></td><td class="desc">RS256 JWT issuance and validation</td></tr>
+        <tr><td><code>rs/zerolog</code></td><td class="desc">Structured JSON logging (zero-allocation)</td></tr>
+        <tr><td><code>gorilla/websocket</code></td><td class="desc">WebSocket server for presence hub</td></tr>
+        <tr><td><code>aws/aws-sdk-go-v2</code></td><td class="desc">S3-compatible object storage (avatars)</td></tr>
+        <tr><td><code>golang.org/x/crypto</code></td><td class="desc">bcrypt password hashing</td></tr>
+        <tr><td><code>joho/godotenv</code></td><td class="desc">.env file loading in development</td></tr>
+      </tbody>
+    </table>
+  </main>
+</div>
+
+<footer>
+  <span>PRJTPT Documentation</span>
+  <span>&#183;</span>
+  <span>Generated 2026-04-02</span>
+</footer>
+
+</body>
+</html>
